@@ -1,31 +1,4 @@
-import React from "react"
-
-function App() {
-
-  return (
-    <>
-<div className="min-h-screen bg-gray-100 font-sans flex flex-col justify-between">
-  
-  {/* 1. HEADER / NAV BAR */}
-  <header className="bg-[#f0f2f5] text-[#1e293b] py-4 px-8 flex justify-between items-center font-medium shadow-sm border-b border-gray-200">
-    <div className="flex items-center gap-2">
-      <span className="text-[#111e38] text-2xl font-black tracking-tighter border-b-2 border-[#3b82f6]">
-        T
-      </span>
-      <h2 className="text-xl font-bold tracking-wider text-[#111e38] hidden sm:inline">Tasklab</h2>
-    </div>
-    
-    <nav>
-      <ul className="flex gap-6 cursor-pointer text-sm font-bold text-gray-600 list-none">
-        <li className="text-[#2563eb] border-b-2 border-[#2563eb] pb-1">Empleos</li>
-        <li className="hover:text-[#2563eb] transition-colors">Trabajadores</li>
-        <li className="hover:text-[#2563eb] transition-colors">Usuario</li>
-        <li className="hover:text-[#2563eb] transition-colors">Chats</li>
-      </ul>
-    </nav>
-  </header>
-
-  {/* 2. SECCIÓN PRINCIPAL */}
+    {/* 2. SECCIÓN PRINCIPAL */}
   <main className="flex-1 max-w-5xl w-full mx-auto p-4 md:p-6 flex flex-col gap-6">
     
     {/* Fila del Título Central */}
@@ -150,15 +123,3 @@ function App() {
 
     </div>
   </main>
-
-  {/* 3. FOOTER */}
-  <footer className="bg-[#e2e8f0] text-[#475569] text-center py-12 border-t border-gray-300">
-    <p className="text-xl font-semibold tracking-wide lowercase">hacer el footer</p>
-  </footer>
-
-</div>
-    </>
-  )
-}
-
-export default App
