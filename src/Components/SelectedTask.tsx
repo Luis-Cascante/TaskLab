@@ -1,18 +1,25 @@
-    {/* 2. SECCIÓN PRINCIPAL */}
+import { useState } from "react"
+
+import TaskCard from "../Components/TaskCard"
+
+function SelectedTask() {
+  return (
+    <>
+          {/* 2. SECCIÓN PRINCIPAL */}
   <main className="flex-1 max-w-5xl w-full mx-auto p-4 md:p-6 flex flex-col gap-6">
     
     {/* Fila del Título Central */}
     <div className="text-center py-2">
-      <h1 className="text-xl font-bold text-gray-800">
+      <h1 className="text-3xl font-bold text-gray-800">
         Trabajos Publicados
       </h1>
     </div>
 
     {/* Contenedor del Tablero Naranja (Vista Detallada de la Solicitud Principal) */}
-    <div className="bg-[#f59e0b] p-4 rounded-2xl shadow-lg flex flex-col gap-3">
+    <div className="bg-[#f59e0b]  rounded-2xl shadow-lg flex flex-col ">
       
       {/* Botón Volver (Flecha izquierda estilizada en círculo azul oscuro) */}
-      <div className="flex justify-start">
+      <div className="flex justify-start m-1" >
         <button className="bg-[#111e38] hover:bg-[#1a2e54] text-white p-2 rounded-xl transition-colors flex items-center justify-center shadow-md">
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -21,7 +28,7 @@
       </div>
 
       {/* Contenedor de la Tarjeta de Trabajo Destacada (Azul Rey Amplio) */}
-      <div className="bg-[#1d61a1] text-white rounded-2xl p-6 md:p-8 flex flex-col md:flex-row gap-6 shadow-inner relative">
+      <div className="bg-[#1d61a1] text-white rounded-b-2xl md:p-8 flex flex-col md:flex-row gap-6 shadow-inner relative">
         
         {/* Espacio / Imagen del Trabajo Principal (Grande y redondeada) */}
         <div className="w-full md:w-72 h-48 md:h-64 bg-[#d1d5db] rounded-3xl flex-shrink-0 overflow-hidden shadow-md">
@@ -76,27 +83,7 @@
       </div>
 
       {/* TARJETA TRABAJO SECUNDARIA 1 */}
-      <div className="bg-[#1d61a1] text-white rounded-xl p-4 flex flex-col sm:flex-row gap-4 shadow-md transition-transform hover:scale-[1.01]">
-        <div className="w-full sm:w-28 sm:h-28 bg-[#d1d5db] rounded-xl flex-shrink-0 flex items-center justify-center overflow-hidden">
-          <img 
-            src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=150&auto=format&fit=crop" 
-            alt="Trabajo secundario" 
-            className="w-full h-full object-cover opacity-80"
-          />
-        </div>
-        <div className="flex-1 flex flex-col gap-1">
-          <h4 className="text-lg font-bold text-[#f59e0b] tracking-wide">Titulo del trabajo</h4>
-          <p className="text-xs font-bold text-gray-200 uppercase tracking-wider">
-            Ubicacion / Categoria / Tipo de contrato
-          </p>
-          <p className="text-xs text-blue-500 font-bold bg-white/90 inline-block px-2 py-0.5 rounded w-fit mt-0.5">
-            Descripcion:
-          </p>
-          <p className="text-xs text-gray-100 font-light leading-relaxed mt-0.5">
-            Lorem ipsum dolor sit amet consectetur. Purus at nunc sit et diam dolor turpis. Mi vitae nulla velit habitasse nunc ridiculus eget habitant commodo. Sagittis ut pellentesque vitae a at commodo ut suspendisse viverra.
-          </p>
-        </div>
-      </div>
+      <TaskCard/>
 
       {/* TARJETA TRABAJO SECUNDARIA 2 */}
       <div className="bg-[#1d61a1] text-white rounded-xl p-4 flex flex-col sm:flex-row gap-4 shadow-md transition-transform hover:scale-[1.01]">
@@ -123,3 +110,8 @@
 
     </div>
   </main>
+    </>
+  )
+}
+
+export default SelectedTask

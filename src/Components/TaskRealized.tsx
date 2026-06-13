@@ -1,8 +1,6 @@
 import { useState } from "react"
 
-import TaskCard from "./Components/TaskCard"
-
-function App() {
+function TaskRealized() {
   return (
     <>
     {/* Header: variable 1 */}
@@ -107,4 +105,4 @@ function App() {
   )
 }
 
-export default App
+export default TaskRealized

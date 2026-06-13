@@ -1,14 +1,21 @@
-{/* 2. SECCIÓN PRINCIPAL */}
+import { useState } from "react"
+
+import TaskCard from "../Components/TaskCard"
+
+function ListTask() {
+  return (
+    <>
+      {/* 2. SECCIÓN PRINCIPAL */}
   <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
     
     {/* Fila del Título y Botón Superior */}
     <div className="flex justify-between items-center mb-6 relative">
       {/* Título centrado en la pantalla */}
-      <h1 className="text-xl font-bold text-gray-800 absolute left-1/2 transform -translate-x-1/2 hidden sm:block">
+      <h1 className="text-3xl font-bold text-gray-800 absolute left-1/2 transform -translate-x-1/2 hidden sm:block">
         Trabajos Publicados
       </h1>
       {/* Título alternativo para móviles si el espacio es reducido */}
-      <h1 className="text-xl font-bold text-gray-800 sm:hidden">
+      <h1 className="text-2xl font-bold text-gray-800 sm:hidden">
         Trabajos
       </h1>
       
@@ -39,10 +46,10 @@
       </div>
 
       {/* Grid de Dos Columnas: Filtros (Izquierda) vs Lista de Tarjetas (Derecha) */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4  /*gap-4*/">
         
         {/* COLUMNA DE FILTROS (Color Azul Marino Corporativo) */}
-        <aside className="bg-[#111e38] text-white p-5 rounded-xl flex flex-col gap-6 h-fit">
+        <aside className="bg-[#111e38] text-white p-5 /*rounded-xl*/ flex flex-col gap-6">
           <h4 className="text-xl font-bold text-[#f59e0b] tracking-wide border-b border-gray-700 pb-2">
             Filtros
           </h4>
@@ -79,7 +86,7 @@
         </aside>
 
         {/* COLUMNA DE TARJETA DE TRABAJOS (Ocupa 3 columnas en pantallas grandes) */}
-        <section className="md:col-span-3 flex flex-col gap-4 bg-[#e5e7eb] p-4 rounded-xl">
+        <section className="md:col-span-3 flex flex-col gap-4 bg-[#e5e7eb] p-4 /*rounded-xl*/">
           
           {/* TARJETA TRABAJO 1 */}
           <div className="bg-[#1d61a1] text-white rounded-xl p-4 flex flex-col sm:flex-row gap-4 shadow-md transition-transform hover:scale-[1.01]">
@@ -152,7 +159,14 @@
             </div>
           </div>
 
+          <TaskCard/>
+
         </section>
       </div>
     </div>
   </main>
+    </>
+  )
+}
+
+export default ListTask
