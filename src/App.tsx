@@ -1,163 +1,49 @@
-import React from "react"
+import { useState } from "react"
+import Footer from "./Components/Footer"
+import Header from "./Components/Header"
+import Chat from "./Components/Chat"
+import ListTask from "./Components/ListTask"
+import MainHub from "./Components/MainHub"
+import PerfilUser from "./Components/PerfilUser"
+import PublicarSolicitud from "./Components/PublicarSolicitud"
+import SelectedTask from "./Components/SelectedTask"
+import Trabajadores from "./Components/Trabajadores"
+
+type MainView = "home" | "jobs" | "detail" | "workers" | "profile" | "chat" | "publish"
 
 function App() {
+  const [activeView, setActiveView] = useState<MainView>("jobs")
+
+  if (activeView === "publish") {
+    return <PublicarSolicitud onCancel={() => setActiveView("jobs")} />
+  }
+
+  const renderContent = () => {
+    switch (activeView) {
+      case "home":
+        return <MainHub />
+      case "detail":
+        return <SelectedTask onBack={() => setActiveView("jobs")} onContact={() => setActiveView("chat")} />
+      case "workers":
+        return <Trabajadores />
+      case "profile":
+        return <PerfilUser />
+      case "chat":
+        return <Chat />
+      case "jobs":
+      default:
+        return <ListTask onOpenTask={() => setActiveView("detail")} onPublish={() => setActiveView("publish")} />
+    }
+  }
 
   return (
-    <>
-<div className="min-h-screen bg-gray-100 font-sans flex flex-col justify-between">
-  
-  {/* 1. HEADER / NAV BAR */}
-  <header className="bg-[#f0f2f5] text-[#1e293b] py-4 px-8 flex justify-between items-center font-medium shadow-sm border-b border-gray-200">
-    <div className="flex items-center gap-2">
-      <span className="text-[#111e38] text-2xl font-black tracking-tighter border-b-2 border-[#3b82f6]">
-        T
-      </span>
-      <h2 className="text-xl font-bold tracking-wider text-[#111e38] hidden sm:inline">Tasklab</h2>
+    <div className="min-h-screen bg-gray-100 font-sans flex flex-col justify-between">
+      <Header activeView={activeView} onNavigate={setActiveView} />
+      <main className="flex-1">
+        {renderContent()}
+      </main>
+      <Footer />
     </div>
-    
-    <nav>
-      <ul className="flex gap-6 cursor-pointer text-sm font-bold text-gray-600 list-none">
-        <li className="text-[#2563eb] border-b-2 border-[#2563eb] pb-1">Empleos</li>
-        <li className="hover:text-[#2563eb] transition-colors">Trabajadores</li>
-        <li className="hover:text-[#2563eb] transition-colors">Usuario</li>
-        <li className="hover:text-[#2563eb] transition-colors">Chats</li>
-      </ul>
-    </nav>
-  </header>
-
-  {/* 2. SECCIÓN PRINCIPAL */}
-  <main className="flex-1 max-w-5xl w-full mx-auto p-4 md:p-6 flex flex-col gap-6">
-    
-    {/* Fila del Título Central */}
-    <div className="text-center py-2">
-      <h1 className="text-xl font-bold text-gray-800">
-        Trabajos Publicados
-      </h1>
-    </div>
-
-    {/* Contenedor del Tablero Naranja (Vista Detallada de la Solicitud Principal) */}
-    <div className="bg-[#f59e0b] p-4 rounded-2xl shadow-lg flex flex-col gap-3">
-      
-      {/* Botón Volver (Flecha izquierda estilizada en círculo azul oscuro) */}
-      <div className="flex justify-start">
-        <button className="bg-[#111e38] hover:bg-[#1a2e54] text-white p-2 rounded-xl transition-colors flex items-center justify-center shadow-md">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-        </button>
-      </div>
-
-      {/* Contenedor de la Tarjeta de Trabajo Destacada (Azul Rey Amplio) */}
-      <div className="bg-[#1d61a1] text-white rounded-2xl p-6 md:p-8 flex flex-col md:flex-row gap-6 shadow-inner relative">
-        
-        {/* Espacio / Imagen del Trabajo Principal (Grande y redondeada) */}
-        <div className="w-full md:w-72 h-48 md:h-64 bg-[#d1d5db] rounded-3xl flex-shrink-0 overflow-hidden shadow-md">
-          <img 
-            src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=400&auto=format&fit=crop" 
-            alt="Detalle del trabajo solicitado" 
-            className="w-full h-full object-cover opacity-90"
-          />
-        </div>
-
-        {/* Bloque Informativo */}
-        <div className="flex-1 flex flex-col justify-between gap-4">
-          
-          <div className="flex flex-col gap-2">
-            <h2 className="text-2xl md:text-3xl font-bold text-white tracking-wide">
-              Titulo del trabajo
-            </h2>
-            <p className="text-xs md:text-sm font-semibold text-gray-900 bg-white/20 w-fit px-3 py-1 rounded-md">
-              <span className="font-bold">Trabajo solicitado por:</span> Nombre de usuario
-            </p>
-            
-            {/* Detalles descriptivos */}
-            <div className="text-sm space-y-1.5 mt-2">
-              <p className="leading-relaxed text-gray-100 font-light text-justify">
-                <strong className="text-gray-900 font-bold">Descripcion:</strong> Lorem ipsum dolor sit amet consectetur. Ipsum risus sit tempor aliquet auctor. Mattis tortor eget magnis vitae dolor pulvinar. Maecenas vitae varius mauris eu. Accumsan ornare nulla hendrerit elementum. Tristique ultricies dictum interdum malesuada urna placerat eros non. Risus aliquam ut tortor posuere massa elementum at.
-              </p>
-              <p className="text-gray-100"><strong className="text-gray-900 font-bold">Ubicacion:</strong> Ubicacion.</p>
-              <p className="text-gray-100"><strong className="text-gray-900 font-bold">Categoria:</strong> Categoria.</p>
-              <p className="text-gray-100"><strong className="text-gray-900 font-bold">Contrato:</strong> Tipo de contrato.</p>
-            </div>
-          </div>
-
-          {/* Botón Contactar posicionado abajo a la derecha */}
-          <div className="flex justify-end mt-4">
-            <button className="bg-[#f59e0b] hover:bg-[#e08e06] text-gray-900 font-black text-base px-8 py-2.5 rounded-xl shadow-md transition-colors tracking-wide">
-              Contactar
-            </button>
-          </div>
-
-        </div>
-      </div>
-
-    </div>
-
-    {/* Sección de Otras Solicitudes (Alineado y bien espaciado) */}
-    <div className="w-full flex flex-col gap-4 mt-4">
-      
-      <div className="text-center py-2">
-        <h3 className="text-lg font-bold text-gray-800">
-          Otras solicitudes
-        </h3>
-      </div>
-
-      {/* TARJETA TRABAJO SECUNDARIA 1 */}
-      <div className="bg-[#1d61a1] text-white rounded-xl p-4 flex flex-col sm:flex-row gap-4 shadow-md transition-transform hover:scale-[1.01]">
-        <div className="w-full sm:w-28 sm:h-28 bg-[#d1d5db] rounded-xl flex-shrink-0 flex items-center justify-center overflow-hidden">
-          <img 
-            src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=150&auto=format&fit=crop" 
-            alt="Trabajo secundario" 
-            className="w-full h-full object-cover opacity-80"
-          />
-        </div>
-        <div className="flex-1 flex flex-col gap-1">
-          <h4 className="text-lg font-bold text-[#f59e0b] tracking-wide">Titulo del trabajo</h4>
-          <p className="text-xs font-bold text-gray-200 uppercase tracking-wider">
-            Ubicacion / Categoria / Tipo de contrato
-          </p>
-          <p className="text-xs text-blue-500 font-bold bg-white/90 inline-block px-2 py-0.5 rounded w-fit mt-0.5">
-            Descripcion:
-          </p>
-          <p className="text-xs text-gray-100 font-light leading-relaxed mt-0.5">
-            Lorem ipsum dolor sit amet consectetur. Purus at nunc sit et diam dolor turpis. Mi vitae nulla velit habitasse nunc ridiculus eget habitant commodo. Sagittis ut pellentesque vitae a at commodo ut suspendisse viverra.
-          </p>
-        </div>
-      </div>
-
-      {/* TARJETA TRABAJO SECUNDARIA 2 */}
-      <div className="bg-[#1d61a1] text-white rounded-xl p-4 flex flex-col sm:flex-row gap-4 shadow-md transition-transform hover:scale-[1.01]">
-        <div className="w-full sm:w-28 sm:h-28 bg-[#d1d5db] rounded-xl flex-shrink-0 flex items-center justify-center overflow-hidden">
-          <img 
-            src="https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=150&auto=format&fit=crop" 
-            alt="Trabajo secundario" 
-            className="w-full h-full object-cover opacity-80"
-          />
-        </div>
-        <div className="flex-1 flex flex-col gap-1">
-          <h4 className="text-lg font-bold text-[#f59e0b] tracking-wide">Titulo del trabajo</h4>
-          <p className="text-xs font-bold text-gray-200 uppercase tracking-wider">
-            Ubicacion / Categoria / Tipo de contrato
-          </p>
-          <p className="text-xs text-blue-500 font-bold bg-white/90 inline-block px-2 py-0.5 rounded w-fit mt-0.5">
-            Descripcion:
-          </p>
-          <p className="text-xs text-gray-100 font-light leading-relaxed mt-0.5">
-            Lorem ipsum dolor sit amet consectetur. Purus at nunc sit et diam dolor turpis. Mi vitae nulla velit habitasse nunc ridiculus eget habitant commodo. Sagittis ut pellentesque vitae a at commodo ut suspendisse viverra.
-          </p>
-        </div>
-      </div>
-
-    </div>
-  </main>
-
-  {/* 3. FOOTER */}
-  <footer className="bg-[#e2e8f0] text-[#475569] text-center py-12 border-t border-gray-300">
-    <p className="text-xl font-semibold tracking-wide lowercase">hacer el footer</p>
-  </footer>
-
-</div>
-    </>
   )
 }
 
