@@ -1,8 +1,11 @@
 import { useState } from "react"
 
+type RegisterProps = {
+  onChangeLogin?: () => void,
+  onRegisterSuccess?: () => void
+}
 
-
-function Register() {
+function Register({ onChangeLogin, onRegisterSuccess }: RegisterProps) {
 const [showPassword, setShowPassword] = useState(false);
   return (
     <>
@@ -123,7 +126,8 @@ const [showPassword, setShowPassword] = useState(false);
 
         {/* Botón de Iniciar Sesión */}
         <button 
-          type="submit" 
+          type="submit"
+          onClick={onRegisterSuccess} 
           className="w-full bg-[#1d61a1] hover:bg-[#154675] text-white font-semibold py-2.5 rounded-xl shadow-md transition-colors mt-4"
         >
           Crear cuenta
@@ -138,7 +142,9 @@ const [showPassword, setShowPassword] = useState(false);
       </div>
 
       <div className="text-center text-sm text-gray-700 font-medium">
-        Inicia sesión <a href="/login" className="text-amber-500 hover:underline">aquí</a>
+        Inicia sesión <span className="text-amber-500 hover:underline" onClick={onChangeLogin}>
+          aquí
+        </span>
       </div>
 
     </div>

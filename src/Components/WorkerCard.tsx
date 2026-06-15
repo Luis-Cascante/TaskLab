@@ -1,0 +1,33 @@
+import type { worker } from "./PruebasWorkerData";
+
+type WorkerCardProps = {
+    onOpenProfile?: () => void;
+    worker: worker
+}
+
+function WorkerCard({ onOpenProfile, worker }: WorkerCardProps) {
+        return (
+            <>
+            <article className="rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden">
+            <div className="h-24 bg-[#1d61a1]" />
+            <div className="p-5 -mt-10">
+              <div className="w-20 h-20 rounded-2xl border-4 border-white bg-gray-300 shadow-md overflow-hidden">
+                <img src="" alt={worker.name} className="w-full h-full object-cover" />
+              </div>
+              <h2 className="mt-4 text-lg font-bold text-gray-900">{worker.name}</h2>
+              <p className="text-sm text-[#1d61a1] font-semibold">{worker.profession}</p>
+              <p className="text-sm text-gray-600 mt-2">{worker.location}</p>
+              <p className="text-sm text-amber-500 font-semibold mt-2">⭐ {worker.rating}</p>
+              <button 
+              type="button" 
+              onClick={onOpenProfile}
+              className="mt-4 w-full rounded-xl bg-[#111e38] text-white py-2 text-sm font-semibold hover:bg-[#1a2e54] transition-colors">
+                Ver perfil
+              </button>
+            </div>
+          </article>
+            </>
+        )
+}
+
+export default WorkerCard

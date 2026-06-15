@@ -1,7 +1,16 @@
-function TaskCardV2() {
+import type { task } from "./PruebasTaskData"
+
+type TaskCardV2Props = {
+    task: task
+    onOpenTask?: () => void;
+}
+
+function TaskCardV2({ task, onOpenTask }: TaskCardV2Props) {
   return (
     <>
-        <div className="snap-start shrink-0 w-full max-w-[320px] bg-[#111e38] rounded-3xl overflow-hidden shadow-lg border border-gray-800">
+        <div 
+        onClick={onOpenTask}
+        className="snap-start shrink-0 w-full max-w-[320px] bg-[#111e38] rounded-3xl overflow-hidden shadow-lg border border-gray-800 transition-transform hover:scale-[1.05]">
   {/* Contenedor de la Imagen */}
   <div className="w-full h-48 overflow-hidden">
     <img 
@@ -15,18 +24,18 @@ function TaskCardV2() {
   <div className="p-5 flex flex-col gap-2 bg-[#1d61a1]">
     {/* Título del trabajo */}
     <h4 className="text-xl font-bold text-[#f59e0b] tracking-wide">
-      Titulo del trabajo
+      {task.title}
     </h4>
 
     {/* Categoría */}
     <p className="text-sm font-medium text-gray-400">
-      Categoria
+      {task.category}
     </p>
 
     {/* Descripción */}
     <p className="text-xs text-gray-200 font-light leading-relaxed mt-1">
       <span className="font-bold text-white block mb-0.5">Descripcion:</span>
-      Lorem ipsum dolor sit amet consectetur. Elementum lorem tellus mi scelerisque dictumst. In proin massa gravida diam at pretium tellus est odio.
+      {task.description}
     </p>
   </div>
 </div>
