@@ -1,24 +1,26 @@
-import type { ReviewProfile } from "../../Interfaces/user";
+import type { ReviewDB } from "../../types/review";
 
 
 interface ReviewProfileProps{
-    reviewProfile: ReviewProfile;
+    review: ReviewDB;
 }
-function ReviewPerfilCard({ reviewProfile }: ReviewProfileProps) {
- const stars = '⭐'.repeat(reviewProfile.rating);
+function ReviewPerfilCard({ review }: ReviewProfileProps) {
+
+
+ const stars = '⭐'.repeat(review.rating);
     return (
     <>
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 flex flex-col justify-between transition-all hover:shadow-md">
           <div>
             <div className="flex items-center gap-3 mb-4">
-              <img src={reviewProfile.image} alt={reviewProfile.name} className="w-10 h-10 rounded-full object-cover bg-gray-200 ring-2 ring-gray-50" />
+              <img src={review.imageUrl} alt={review.name} className="w-10 h-10 rounded-full object-cover bg-gray-200 ring-2 ring-gray-50" />
               <div>
-                <p className="font-semibold text-gray-800 text-sm">{reviewProfile.name}</p>
+                <p className="font-semibold text-gray-800 text-sm">{review.name}</p>
                 <p className="text-xs text-amber-400 flex gap-0.5 mt-0.5">{stars}</p>
               </div>
             </div>
             <p className="text-xs text-gray-500 leading-relaxed font-light">
-                {reviewProfile.review}
+                {review.review}
             </p>
           </div>
           <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-50">

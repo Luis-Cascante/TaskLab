@@ -1,12 +1,12 @@
-import type { GeneralInfo } from '../../Interfaces/user';
-import { user } from '../../Interfaces/user';
-
 interface GeneralInfoProps {
-  generalInfo: GeneralInfo;
+  aboutMe: string | undefined;
+  degrees: string | undefined;
+  profilePicture: string  | undefined;
+  name: string  | undefined;
   pestañaActiva: string;
 }
 
-function GeneralInfo({ generalInfo, pestañaActiva }: GeneralInfoProps) {
+function GeneralInfo({ aboutMe, degrees, profilePicture, name, pestañaActiva }: GeneralInfoProps) {
   if (pestañaActiva !== 'Informacion General') {
     return null;
   }
@@ -21,14 +21,14 @@ function GeneralInfo({ generalInfo, pestañaActiva }: GeneralInfoProps) {
           <div>
             <h3 className="text-xl font-bold mb-2">Sobre mí</h3>
             <p className="text-gray-600 leading-relaxed">
-              {generalInfo.aboutMe}
+              {aboutMe}
             </p>
           </div>
 
           <div>
             <h3 className="text-xl font-bold mb-2">Títulos</h3>
             <ul className="list-disc pl-5 text-gray-600">
-              <li>{generalInfo.degrees}</li>
+              <li>{degrees}</li>
             </ul>
           </div>
 
@@ -37,8 +37,8 @@ function GeneralInfo({ generalInfo, pestañaActiva }: GeneralInfoProps) {
         {/* Imagen lateral */}
         <div>
           <img
-            src={user.profilePicture}
-            alt={user.name}
+            src={profilePicture}
+            alt={name}
             className="w-full h-100 object-cover rounded-xl shadow-lg"
           />
         </div>

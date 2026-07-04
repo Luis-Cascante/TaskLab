@@ -1,9 +1,9 @@
-import Review from "./Review";
-import type { Review as ReviewInterface } from '../../Interfaces/user';
+import type { PortfolioItem } from "../../types/user";
+import PortfolioItemCard from './PortfolioItem';
 
 
 interface PortafolioProps {
-    portfolioItems: ReviewInterface[];
+    portfolioItems: PortfolioItem[] | undefined;
     pestañaActiva: string;
 }
 
@@ -19,8 +19,8 @@ function Portafolio({ portfolioItems, pestañaActiva }: PortafolioProps) {
           {/* Contenedor Grid: Configurado a 3 columnas en pantallas medianas/grandes */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             
-            {portfolioItems.map((item, index) => (
-              <Review 
+            {portfolioItems?.map((item, index) => (
+              < PortfolioItemCard 
                 key={index}
                 review={item}
               />

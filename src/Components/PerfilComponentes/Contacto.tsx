@@ -1,14 +1,14 @@
 
 
 interface ContactoProps {
-  email: string;
-  phone: string;
-  address: string;
+  email: string  | undefined;
+  phone: string | undefined;
+  address: string | undefined;
+  image: string | undefined;
   pestañaActiva: string;
-  isOwner: boolean;
 }
 
-function Contacto({ email, phone, address, pestañaActiva, isOwner }: ContactoProps) {
+function Contacto({ email, phone, address, image, pestañaActiva }: ContactoProps) {
   if (pestañaActiva !== 'Contacto') return null;
 
   return (
@@ -46,7 +46,7 @@ function Contacto({ email, phone, address, pestañaActiva, isOwner }: ContactoPr
       {/* Columna derecha */}
       <div className="flex flex-col">
         <img
-          src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1170&q=80"
+          src={image}
           alt="Imagen de contacto"
           className="w-full h-80 object-cover rounded-xl shadow-lg"
         />

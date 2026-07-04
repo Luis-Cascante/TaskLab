@@ -1,16 +1,31 @@
-import type { ReviewProfile } from "../../Interfaces/user";
+import type { ReviewDB } from "../../types/review";
 
 import ReviewPerfilCard from "./ReviewPerfilCard";
 
 import AddReview from "./AddReview";
+import { useEffect, useState } from "react";
+import { reviewsService } from "../../services/reviews";
 
 interface ReviewProfileProps {
-  reviewsProfile: ReviewProfile[];
+  work_info_id?: string;
   pestañaActiva: string;
+  isOwner: boolean;
+  userId: string;
 }
 
-function ReviewProfile({reviewsProfile, pestañaActiva,}: ReviewProfileProps) {
+function ReviewProfile({ work_info_id, pestañaActiva, isOwner, userId }: ReviewProfileProps) {
+
+  const [reviews, setReviews] = useState<ReviewDB[]>([]);
+  const fetchReviews = () => {
+    reviewsService.getReviewsByUserId(userId).then(setReviews);
+  };
+  useEffect(() => {
+    fetchReviews();
+  }, [userId]);
+
+
   if (pestañaActiva !== "Opiniones") {
+
     return null;
   }
 
@@ -18,7 +33,7 @@ function ReviewProfile({reviewsProfile, pestañaActiva,}: ReviewProfileProps) {
     <section className="bg-white py-12">
       <div className="max-w-7xl mx-auto">
 
-        {reviewsProfile.length === 0 ? (
+        {reviews?.length === 0 ? (
           <div className="text-center py-12">
             <h2 className="text-2xl font-bold text-gray-800 mb-3">
               Aún no hay reseñas
@@ -35,17 +50,18 @@ function ReviewProfile({reviewsProfile, pestañaActiva,}: ReviewProfileProps) {
             </h2>
 
             <div className="grid md:grid-cols-3 gap-6">
-              {reviewsProfile.map((review) => (
+              {reviews?.map((review) => (
                 <ReviewPerfilCard
                   key={review.id}
-                 reviewProfile={review}
+                  review={review}
                 />
               ))}
             </div>
           </>
         )}
-
-        <AddReview />
+        {!isOwner && (
+          <AddReview work_info_id={work_info_id} onReviewAdded={fetchReviews} />
+        )}
 
       </div>
     </section>
