@@ -225,29 +225,50 @@ function SelectedTask({
                             className="mt-2 rounded-xl border border-gray-300 bg-white text-gray-900 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#1d61a1]"
                           />
                         </label>
-                        <label className="flex flex-col text-sm text-gray-200">
+                        <label className="flex flex-col text-sm text-gray-200 relative">
                           Categoría
-                          <input
-                            type="text"
+                          <select
                             value={editCategory}
                             onChange={(event) =>
                               setEditCategory(event.target.value)
                             }
-                            className="mt-2 rounded-xl border border-gray-300 bg-white text-gray-900 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#1d61a1]"
-                          />
+                            className="mt-2 rounded-xl border border-gray-300 bg-white text-gray-900 px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-[#1d61a1] appearance-none"
+                          >
+                            <option value="" disabled hidden>
+                              Seleccionar categoría
+                            </option>
+                            <option value="Hogar">Hogar</option>
+                            <option value="Mantenimiento">Mantenimiento</option>
+                            <option value="Construcción">Construcción</option>
+                            <option value="Tutoria">Tutoría</option>
+                          </select>
+                          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">
+                            ▼
+                          </span>
                         </label>
                       </div>
 
-                      <label className="flex flex-col text-sm text-gray-200">
+                      <label className="flex flex-col text-sm text-gray-200 relative">
                         Contrato
-                        <input
-                          type="text"
+                        <select
                           value={editAgreement}
                           onChange={(event) =>
                             setEditAgreement(event.target.value)
                           }
-                          className="mt-2 w-full rounded-xl border border-gray-300 bg-white text-gray-900 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#1d61a1]"
-                        />
+                          className="mt-2 w-full rounded-xl border border-gray-300 bg-white text-gray-900 px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-[#1d61a1] appearance-none"
+                        >
+                          <option value="" disabled hidden>
+                            Seleccionar tipo de contrato
+                          </option>
+                          <option value="Pago unico">Pago única</option>
+                          <option value="Pago por hora">Pago por hora</option>
+                          <option value="Contrato mensual">
+                            Contrato mensual
+                          </option>
+                        </select>
+                        <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-500">
+                          ▼
+                        </span>
                       </label>
                     </div>
 
