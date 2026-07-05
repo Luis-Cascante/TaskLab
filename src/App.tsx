@@ -46,42 +46,11 @@ function App() {
     setActiveView("publish")
   }
 
-  const handleEditTask = (taskToEdit: typeof tasks[number]) => {
-    const title = window.prompt("Editar título", taskToEdit.title)
-    if (!title?.trim()) return
-
-    const description = window.prompt("Editar descripción", taskToEdit.description) ?? taskToEdit.description
-    const location = window.prompt("Editar ubicación", taskToEdit.location) ?? taskToEdit.location
-    const category = window.prompt("Editar categoría", taskToEdit.category) ?? taskToEdit.category
-    const agreement = window.prompt("Editar tipo de contrato", taskToEdit.agreement) ?? taskToEdit.agreement
-
+  const handleEditTask = (updatedTask: typeof tasks[number]) => {
     setTasksList((prev) =>
-      prev.map((task) =>
-        task.id === taskToEdit.id
-          ? {
-              ...task,
-              title: title.trim(),
-              description: description.trim() || taskToEdit.description,
-              location: location.trim() || taskToEdit.location,
-              category: category.trim() || taskToEdit.category,
-              agreement: agreement.trim() || taskToEdit.agreement,
-            }
-          : task,
-      ),
+      prev.map((task) => (task.id === updatedTask.id ? updatedTask : task)),
     )
-
-    setSelectedTask((current) =>
-      current.id === taskToEdit.id
-        ? {
-            ...current,
-            title: title.trim(),
-            description: description.trim() || current.description,
-            location: location.trim() || current.location,
-            category: category.trim() || current.category,
-            agreement: agreement.trim() || current.agreement,
-          }
-        : current,
-    )
+    setSelectedTask(updatedTask)
   }
 
   const handleDeleteTask = (taskId: number) => {

@@ -5,7 +5,7 @@ import Portafolio from "./PerfilComponentes/Portafolio";
 import ReviewsPerfil from "./PerfilComponentes/ReviewsPerfil";
 import TaskCard from "./TaskCard";
 
-type ProfileTab = "general" | "portafolio" | "opiniones";
+type ProfileTab = "general" | "portafolio" | "opiniones" | "trabajos";
 
 type PerfilUserProps = {
   currentUser: string;
@@ -107,6 +107,19 @@ function PerfilUser({
                 Opiniones
               </button>
             </li>
+            <li>
+              <button
+                type="button"
+                onClick={() => setActiveTab("trabajos")}
+                className={
+                  activeTab === "trabajos"
+                    ? "py-4 text-[#3b82f6] border-b-2 border-[#3b82f6] cursor-pointer"
+                    : "py-4 hover:text-gray-800 transition-colors cursor-pointer"
+                }
+              >
+                Trabajos
+              </button>
+            </li>
           </ul>
         </div>
       </section>
@@ -114,102 +127,105 @@ function PerfilUser({
       {activeTab === "general" ? <GeneralInfo /> : null}
       {activeTab === "portafolio" ? <Portafolio /> : null}
       {activeTab === "opiniones" ? <ReviewsPerfil /> : null}
-
-      <section className="max-w-7xl mx-auto px-4 md:px-12 py-6">
-        <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-5">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800">
-              Tus trabajos publicados
-            </h2>
-            <p className="text-sm text-gray-600">
-              Administra tus solicitudes como empleador y agrega más si lo
-              deseas.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onAddTask}
-            className="bg-[#1d61a1] hover:bg-[#154675] text-white font-semibold py-2 px-5 rounded-xl shadow-md transition-colors text-sm"
-          >
-            + Agregar trabajo
-          </button>
-        </div>
-
-        {publishedTasks.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4">
-            {publishedTasks.map((task) => (
-              <TaskCard
-                key={task.id}
-                task={task}
-                onOpenTask={() => onOpenTask?.(task)}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-3xl bg-white p-6 shadow-sm text-gray-700">
-            No tienes trabajos publicados todavía. Crea tu primera solicitud en
-            el perfil.
-          </div>
-        )}
-      </section>
-
-      <section className="max-w-7xl mx-auto px-4 md:px-12 py-6">
-        <div className="mb-5">
-          <h2 className="text-2xl font-bold text-gray-800">
-            Trabajos a los que has aplicado
-          </h2>
-          <p className="text-sm text-gray-600">
-            Aquí ves el estado de cada aplicación: pendiente, rechazado o
-            contratado.
-          </p>
-        </div>
-
-        {appliedTasks.length > 0 ? (
-          <div className="grid grid-cols-1 gap-4">
-            {appliedTasks.map(({ task, status }) => (
-              <div
-                key={task.id}
-                className="border border-gray-200 rounded-3xl bg-white p-5 shadow-sm hover:shadow-md transition-shadow"
-              >
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-800">
-                      {task.title}
-                    </h3>
-                    <p className="text-sm text-gray-500">
-                      {task.location} · {task.category} · {task.agreement}
-                    </p>
-                  </div>
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-bold ${
-                      status === "pendiente"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : status === "contratado"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                    }`}
-                  >
-                    {status === "pendiente"
-                      ? "Pendiente"
-                      : status === "contratado"
-                        ? "Contratado"
-                        : "Rechazado"}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600 mt-3">
-                  {task.description.slice(0, 160)}
-                  {task.description.length > 160 ? "..." : ""}
+      {activeTab === "trabajos" ? (
+        <>
+          <section className="max-w-7xl mx-auto px-4 md:px-12 py-6">
+            <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-5">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">
+                  Tus trabajos publicados
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Administra tus solicitudes como empleador y agrega más si lo
+                  deseas.
                 </p>
               </div>
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-3xl bg-white p-6 shadow-sm text-gray-700">
-            Aún no has aplicado a ningún trabajo. Navega por la lista y aplica a
-            las ofertas que te interesen.
-          </div>
-        )}
-      </section>
+              <button
+                type="button"
+                onClick={onAddTask}
+                className="bg-[#1d61a1] hover:bg-[#154675] text-white font-semibold py-2 px-5 rounded-xl shadow-md transition-colors text-sm"
+              >
+                + Agregar trabajo
+              </button>
+            </div>
+
+            {publishedTasks.length > 0 ? (
+              <div className="grid grid-cols-1 gap-4">
+                {publishedTasks.map((task) => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onOpenTask={() => onOpenTask?.(task)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-3xl bg-white p-6 shadow-sm text-gray-700">
+                No tienes trabajos publicados todavía. Crea tu primera solicitud
+                en el perfil.
+              </div>
+            )}
+          </section>
+
+          <section className="max-w-7xl mx-auto px-4 md:px-12 py-6">
+            <div className="mb-5">
+              <h2 className="text-2xl font-bold text-gray-800">
+                Trabajos a los que has aplicado
+              </h2>
+              <p className="text-sm text-gray-600">
+                Aquí ves el estado de cada aplicación: pendiente, rechazado o
+                contratado.
+              </p>
+            </div>
+
+            {appliedTasks.length > 0 ? (
+              <div className="grid grid-cols-1 gap-4">
+                {appliedTasks.map(({ task, status }) => (
+                  <div
+                    key={task.id}
+                    className="border border-gray-200 rounded-3xl bg-white p-5 shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          {task.title}
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          {task.location} · {task.category} · {task.agreement}
+                        </p>
+                      </div>
+                      <span
+                        className={`rounded-full px-3 py-1 text-xs font-bold ${
+                          status === "pendiente"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : status === "contratado"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {status === "pendiente"
+                          ? "Pendiente"
+                          : status === "contratado"
+                            ? "Contratado"
+                            : "Rechazado"}
+                      </span>
+                    </div>
+                    <p className="text-sm text-gray-600 mt-3">
+                      {task.description.slice(0, 160)}
+                      {task.description.length > 160 ? "..." : ""}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-3xl bg-white p-6 shadow-sm text-gray-700">
+                Aún no has aplicado a ningún trabajo. Navega por la lista y
+                aplica a las ofertas que te interesen.
+              </div>
+            )}
+          </section>
+        </>
+      ) : null}
     </div>
   );
 }

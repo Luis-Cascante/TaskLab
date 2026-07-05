@@ -1,4 +1,5 @@
-﻿import type { task } from "./PruebasTaskData";
+﻿import { useEffect, useState } from "react";
+import type { task } from "./PruebasTaskData";
 import TaskCard from "./TaskCard";
 
 type ApplicationStatus = "pendiente" | "rechazado" | "contratado";
@@ -38,6 +39,23 @@ function SelectedTask({
   Task,
   Tasks,
 }: SelectedTaskProps) {
+  const [editMode, setEditMode] = useState(false);
+  const [editTitle, setEditTitle] = useState(Task.title);
+  const [editDescription, setEditDescription] = useState(Task.description);
+  const [editLocation, setEditLocation] = useState(Task.location);
+  const [editCategory, setEditCategory] = useState(Task.category);
+  const [editAgreement, setEditAgreement] = useState(Task.agreement);
+
+  useEffect(() => {
+    if (!editMode) {
+      setEditTitle(Task.title);
+      setEditDescription(Task.description);
+      setEditLocation(Task.location);
+      setEditCategory(Task.category);
+      setEditAgreement(Task.agreement);
+    }
+  }, [Task, editMode]);
+
   const isOwner = Task.employer === currentUser;
   const userApplication = applications.find(
     (app) => app.taskId === Task.id && app.worker === currentUser,
@@ -48,7 +66,9 @@ function SelectedTask({
   const taskApplicants = applications.filter((app) => app.taskId === Task.id);
 
   const primaryButtonLabel = isOwner
-    ? "Editar tarea"
+    ? editMode
+      ? "Guardando..."
+      : "Editar tarea"
     : userApplication
       ? userApplication.status === "pendiente"
         ? "Aplicación pendiente"
@@ -58,8 +78,32 @@ function SelectedTask({
       : "Aplicar";
 
   const isPrimaryDisabled = isOwner
-    ? false
+    ? editMode
+      ? false
+      : false
     : Boolean(userApplication) || hasHiredApplicant;
+
+  const handleSave = () => {
+    const updatedTask = {
+      ...Task,
+      title: editTitle,
+      description: editDescription,
+      location: editLocation,
+      category: editCategory,
+      agreement: editAgreement,
+    };
+    onEditTask?.(updatedTask);
+    setEditMode(false);
+  };
+
+  const handleCancelEdit = () => {
+    setEditMode(false);
+    setEditTitle(Task.title);
+    setEditDescription(Task.description);
+    setEditLocation(Task.location);
+    setEditCategory(Task.category);
+    setEditAgreement(Task.agreement);
+  };
 
   return (
     <main className="flex-1 max-w-5xl w-full mx-auto p-4 md:p-6 flex flex-col gap-6">
@@ -69,7 +113,7 @@ function SelectedTask({
         </h1>
       </div>
 
-      <div className="bg-[#f59e0b] rounded-2xl shadow-lg flex flex-col">
+      <div className="bg-[#f59e0b] rounded-2xl border border-yellow-400/40 shadow-lg flex flex-col">
         <div className="flex justify-between items-center m-1 gap-2">
           <button
             type="button"
@@ -93,28 +137,28 @@ function SelectedTask({
 
           <div className="flex gap-2">
             {isOwner && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => onEditTask?.(Task)}
-                  className="bg-white text-[#1d61a1] font-semibold px-4 py-2 rounded-xl shadow-sm hover:bg-gray-100 transition-colors"
-                >
-                  Modificar
-                </button>
-                <button
-                  type="button"
-                  onClick={() => onDeleteTask?.(Task.id)}
-                  className="bg-red-500 text-white font-semibold px-4 py-2 rounded-xl shadow-sm hover:bg-red-600 transition-colors"
-                >
-                  Eliminar
-                </button>
-              </>
+              <button
+                type="button"
+                onClick={() => setEditMode(true)}
+                className="bg-white text-[#1d61a1] font-semibold px-4 py-2 rounded-xl shadow-sm hover:bg-gray-100 transition-colors"
+              >
+                Editar tarea
+              </button>
+            )}
+            {isOwner && (
+              <button
+                type="button"
+                onClick={() => onDeleteTask?.(Task.id)}
+                className="bg-red-500 text-white font-semibold px-4 py-2 rounded-xl shadow-sm hover:bg-red-600 transition-colors"
+              >
+                Eliminar
+              </button>
             )}
           </div>
         </div>
 
         <div className="bg-[#1d61a1] text-white rounded-b-2xl p-6 md:p-8 flex flex-col md:flex-row gap-6 shadow-inner relative">
-          <div className="w-full md:w-72 h-48 md:h-64 bg-[#d1d5db] rounded-3xl flex-shrink-0 overflow-hidden shadow-md">
+          <div className="w-full md:w-72 h-48 md:h-64 bg-[#d1d5db] rounded-3xl shrink-0 overflow-hidden shadow-md">
             <img
               src="https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=400&auto=format&fit=crop"
               alt="Detalle del trabajo solicitado"
@@ -138,47 +182,134 @@ function SelectedTask({
               </p>
 
               <div className="text-sm space-y-1.5 mt-2">
-                <p className="leading-relaxed text-gray-100 font-light text-justify">
-                  <strong className="text-gray-900 font-bold">
-                    Descripcion:
-                  </strong>{" "}
-                  {Task.description}
-                </p>
-                <p className="text-gray-100">
-                  <strong className="text-gray-900 font-bold">
-                    Ubicacion:
-                  </strong>{" "}
-                  {Task.location}
-                </p>
-                <p className="text-gray-100">
-                  <strong className="text-gray-900 font-bold">
-                    Categoria:
-                  </strong>{" "}
-                  {Task.category}
-                </p>
-                <p className="text-gray-100">
-                  <strong className="text-gray-900 font-bold">Contrato:</strong>{" "}
-                  {Task.agreement}
-                </p>
+                {editMode ? (
+                  <form
+                    className="space-y-4"
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      handleSave();
+                    }}
+                  >
+                    <div className="grid gap-4">
+                      <label className="flex flex-col text-sm text-gray-200">
+                        Título
+                        <input
+                          type="text"
+                          value={editTitle}
+                          onChange={(event) => setEditTitle(event.target.value)}
+                          className="mt-2 w-full rounded-xl border border-gray-300 bg-white text-gray-900 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#1d61a1]"
+                        />
+                      </label>
+
+                      <label className="flex flex-col text-sm text-gray-200">
+                        Descripción
+                        <textarea
+                          value={editDescription}
+                          onChange={(event) =>
+                            setEditDescription(event.target.value)
+                          }
+                          rows={4}
+                          className="mt-2 w-full rounded-xl border border-gray-300 bg-white text-gray-900 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#1d61a1]"
+                        />
+                      </label>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <label className="flex flex-col text-sm text-gray-200">
+                          Ubicación
+                          <input
+                            type="text"
+                            value={editLocation}
+                            onChange={(event) =>
+                              setEditLocation(event.target.value)
+                            }
+                            className="mt-2 rounded-xl border border-gray-300 bg-white text-gray-900 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#1d61a1]"
+                          />
+                        </label>
+                        <label className="flex flex-col text-sm text-gray-200">
+                          Categoría
+                          <input
+                            type="text"
+                            value={editCategory}
+                            onChange={(event) =>
+                              setEditCategory(event.target.value)
+                            }
+                            className="mt-2 rounded-xl border border-gray-300 bg-white text-gray-900 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#1d61a1]"
+                          />
+                        </label>
+                      </div>
+
+                      <label className="flex flex-col text-sm text-gray-200">
+                        Contrato
+                        <input
+                          type="text"
+                          value={editAgreement}
+                          onChange={(event) =>
+                            setEditAgreement(event.target.value)
+                          }
+                          className="mt-2 w-full rounded-xl border border-gray-300 bg-white text-gray-900 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#1d61a1]"
+                        />
+                      </label>
+                    </div>
+
+                    <div className="flex flex-wrap gap-3 justify-end mt-2">
+                      <button
+                        type="button"
+                        onClick={handleCancelEdit}
+                        className="bg-white text-[#1d61a1] font-semibold px-5 py-2 rounded-xl shadow-sm hover:bg-gray-100 transition-colors"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        className="bg-[#111e38] hover:bg-[#0f1f3c] text-white font-semibold px-5 py-2 rounded-xl shadow-sm transition-colors"
+                      >
+                        Guardar cambios
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <>
+                    <p className="leading-relaxed text-gray-100 font-light text-justify">
+                      <strong className="text-gray-900 font-bold">
+                        Descripcion:
+                      </strong>{" "}
+                      {Task.description}
+                    </p>
+                    <p className="text-gray-100">
+                      <strong className="text-gray-900 font-bold">
+                        Ubicacion:
+                      </strong>{" "}
+                      {Task.location}
+                    </p>
+                    <p className="text-gray-100">
+                      <strong className="text-gray-900 font-bold">
+                        Categoria:
+                      </strong>{" "}
+                      {Task.category}
+                    </p>
+                    <p className="text-gray-100">
+                      <strong className="text-gray-900 font-bold">
+                        Contrato:
+                      </strong>{" "}
+                      {Task.agreement}
+                    </p>
+                  </>
+                )}
               </div>
             </div>
 
-            <div className="flex justify-end mt-4 gap-3 flex-wrap">
-              <button
-                type="button"
-                onClick={() => {
-                  if (isOwner) {
-                    onEditTask?.(Task);
-                  } else {
-                    onApply?.(Task.id);
-                  }
-                }}
-                disabled={isPrimaryDisabled}
-                className={`bg-[#f59e0b] ${isPrimaryDisabled ? "opacity-60 cursor-not-allowed" : "hover:bg-[#e08e06]"} text-gray-900 font-black text-base px-8 py-2.5 rounded-xl shadow-md transition-colors tracking-wide`}
-              >
-                {primaryButtonLabel}
-              </button>
-            </div>
+            {!editMode && !isOwner && (
+              <div className="flex justify-end mt-4 gap-3 flex-wrap">
+                <button
+                  type="button"
+                  onClick={() => onApply?.(Task.id)}
+                  disabled={isPrimaryDisabled}
+                  className={`bg-[#f59e0b] ${isPrimaryDisabled ? "opacity-60 cursor-not-allowed" : "hover:bg-[#e08e06]"} text-gray-900 font-black text-base px-8 py-2.5 rounded-xl shadow-md transition-colors tracking-wide`}
+                >
+                  {primaryButtonLabel}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>
