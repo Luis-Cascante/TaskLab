@@ -2,6 +2,11 @@ export type task = {
   id: number;
   title: string;
   employer: string;
+  // Id del usuario real (registeredUsers) que publicó la tarea, si se conoce.
+  // Las tareas de prueba no lo tienen porque "Manuel Perez", "Pepe Juan", etc.
+  // no corresponden a ninguna cuenta registrada; solo las tareas que tú
+  // publicas desde la app en esta sesión lo incluyen (ver PublicarSolicitud.tsx).
+  employerId?: string;
   description: string;
   location: string;
   category: string;

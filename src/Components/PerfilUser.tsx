@@ -1,72 +1,231 @@
-import { useState } from "react"
-import GeneralInfo from "./PerfilComponentes/GeneralInfo"
-import Portafolio from "./PerfilComponentes/Portafolio"
-import ReviewsPerfil from "./PerfilComponentes/ReviewsPerfil"
+import { useState } from "react";
 
-type ProfileTab = "general" | "portafolio" | "opiniones"
+import GeneralInfo from "./PerfilComponentes/GeneralInfo";
+import Portafolio from "./PerfilComponentes/Portafolio";
+import ReviewProfile from "./PerfilComponentes/ReviewsPerfil";
+import Contacto from "./PerfilComponentes/Contacto";
 
-function PerfilUser() {
-  const [activeTab, setActiveTab] = useState<ProfileTab>("general")
+import type { User } from "../types";
+
+interface PerfilUserProps {
+  user: User;
+  isOwner: boolean;
+  onEditProfile: () => void;
+  onAddReview: (review: string, rating: number) => void;
+  onAddPortfolioItem: () => void;
+}
+
+function PerfilUser({ user, isOwner, onEditProfile, onAddReview, onAddPortfolioItem }: PerfilUserProps) {
+  const hasProfessionalProfile =
+    !!user.workInfo &&
+    user.workInfo.generalInfo.aboutMe !== "" &&
+    user.workInfo.generalInfo.degrees !== "";
+
+  const [pestañaActiva, setPestañaActiva] = useState("Contacto");
+
+  const disponibilidad = user.workInfo?.availability ? "bg-green-400" : "bg-red-400";
+  const disponibilidadText = user.workInfo?.availability
+    ? "text-green-300"
+    : "text-red-300";
+  const pestañaActivaClass = "text-[#3b82f6] border-b-2 border-[#3b82f6]";
+  const pestañaInactivaClass =
+    "text-gray-500 hover:text-gray-800 transition-colors cursor-pointer";
+  const stars = "⭐".repeat(user.workInfo?.rating || 5);
 
   return (
-    <div>
-      <section className="bg-[#1d61a1] text-white pt-8 px-4 md:px-12 relative">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 max-w-7xl mx-auto">
-          <div className="flex items-center gap-4">
-            <img 
-              src="" 
-              alt="perfil" 
-              className="w-24 h-24 rounded-full border-4 border-white object-cover bg-gray-300"
-            />
-            <div>
-              <p className="text-2xl font-bold tracking-wide">Juan Pepe</p>
-              <p className="text-sm text-blue-200 font-medium">fontanero experto</p>
-              <p className="text-sm flex items-center gap-1 my-1 text-amber-400 font-semibold">
-                ⭐⭐⭐⭐⭐ <span className="text-white ml-1">4,5</span> <span className="text-blue-200 font-normal text-xs">(17 recomendaciones)</span>
-              </p>
-              <p className="text-xs text-blue-100">Macacona, Esparza</p>
-              <p className="text-xs flex items-center gap-1.5 mt-1 font-medium text-green-300">
-                <span className="w-2.5 h-2.5 rounded-full bg-green-400 block animate-pulse"></span> Disponible
-              </p>
+    <>
+      {!hasProfessionalProfile ? (
+        <>
+          {/* Banner Superior */}
+          <section className="bg-[#1d61a1] text-white pt-8 px-4 md:px-12">
+            <div className="max-w-7xl mx-auto flex justify-between items-center pb-8">
+              <div className="flex items-center gap-4">
+                <img
+                  src={user.profilePicture || "https://picsum.photos/200"}
+                  alt="Perfil"
+                  className="w-24 h-24 rounded-full border-4 border-white object-cover bg-gray-300"
+                />
+
+                <div>
+                  <h1 className="text-2xl font-bold tracking-wide">{user.name}</h1>
+                  {isOwner && (
+                    <p className="text-blue-200 text-sm">
+                      Completa tu perfil para comenzar a ofrecer tus servicios.
+                    </p>
+                  )}
+
+                  <p className="text-blue-200 text-sm">
+                    Miembro de TaskLab desde: {user.created_at}
+                  </p>
+                </div>
+              </div>
+
+              {!isOwner && (
+                <div className="flex gap-4 w-full md:w-auto">
+                  <button className="flex-1 md:flex-none bg-[#f59e0b] hover:bg-[#d97706] text-white font-semibold py-2 px-6 rounded-lg text-sm shadow-md transition-all">
+                    Enviar mensaje
+                  </button>
+                </div>
+              )}
+            </div>
+          </section>
+
+          {isOwner ? (
+            <section className="bg-white py-16 px-4">
+              <div className="max-w-3xl mx-auto text-center">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">
+                  Aún no has creado tu perfil profesional
+                </h2>
+
+                <p className="text-gray-600 mb-8 leading-relaxed">
+                  Completa tu información para que otros usuarios puedan conocer tus
+                  servicios y contratarte.
+                </p>
+
+                <button
+                  className="bg-[#1d61a1] hover:bg-[#1a558f] text-white font-semibold py-3 px-8 rounded-lg shadow-md transition-all"
+                  onClick={onEditProfile}
+                >
+                  Crear perfil profesional
+                </button>
+              </div>
+            </section>
+          ) : (
+            <div className="max-w-7xl mx-auto py-8">
+              <Contacto
+                address={user.address}
+                phone={user.phone}
+                email={user.email}
+                image={user.profilePicture}
+                pestañaActiva={pestañaActiva}
+                isOwner={isOwner}
+              />
+            </div>
+          )}
+        </>
+      ) : (
+        <section className="bg-[#1d61a1] text-white pt-8 px-4 md:px-12 relative">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-8 max-w-7xl mx-auto">
+            <div className="flex items-center gap-4">
+              <img
+                src={user.profilePicture}
+                alt="perfil"
+                className="w-24 h-24 rounded-full border-4 border-white object-cover bg-gray-300"
+              />
+              <div>
+                <p className="text-2xl font-bold tracking-wide">{user.name}</p>
+                <p className="text-sm text-blue-200 font-medium">
+                  {user.workInfo!.profession}
+                </p>
+                <p className="text-sm flex items-center gap-1 my-1 text-amber-400 font-semibold">
+                  {stars} <span className="text-white ml-1">{user.workInfo!.rating}</span>{" "}
+                  <span className="text-blue-200 font-normal text-xs">
+                    ({user.workInfo!.reviews} recomendaciones)
+                  </span>
+                </p>
+                <p className="text-xs text-blue-100">{user.address}</p>
+                <p
+                  className={`text-xs flex items-center gap-1.5 mt-1 font-medium ${disponibilidadText}`}
+                >
+                  <span
+                    className={`w-2.5 h-2.5 rounded-full block animate-pulse ${disponibilidad}`}
+                  ></span>{" "}
+                  {user.workInfo!.availability ? "Disponible" : "No disponible"}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-4 w-full md:w-auto">
+              <button className="flex-1 md:flex-none bg-[#f59e0b] hover:bg-[#d97706] text-white font-semibold py-2 px-6 rounded-lg text-sm shadow-md transition-all">
+                Enviar mensaje
+              </button>
+              <button
+                className="flex-1 md:flex-none bg-[#3b82f6] hover:bg-[#2563eb] text-white font-semibold py-2 px-8 rounded-lg text-sm shadow-md transition-all"
+                onClick={() => setPestañaActiva("Contacto")}
+              >
+                Contacto
+              </button>
             </div>
           </div>
 
-          <div className="flex gap-4 w-full md:w-auto">
-            <button className="flex-1 md:flex-none bg-[#f59e0b] hover:bg-[#d97706] text-white font-semibold py-2 px-6 rounded-lg text-sm shadow-md transition-all">
-              Enviar mensaje
-            </button>
-            <button className="flex-1 md:flex-none bg-[#3b82f6] hover:bg-[#2563eb] text-white font-semibold py-2 px-8 rounded-lg text-sm shadow-md transition-all">
-              Contactar
-            </button>
+          <div className="bg-white text-gray-500 font-semibold text-sm -mx-4 md:-mx-12 px-4 md:px-12">
+            <div className="mx-auto border-b border-gray-200 flex flex-col md:flex-row justify-between items-center gap-6 max-w-7xl">
+              <ul className="flex gap-8 max-w-7xl list-none justify-center md:justify-start">
+                <li
+                  className={
+                    pestañaActiva === "Informacion General"
+                      ? `py-4 ${pestañaActivaClass}`
+                      : `py-4 ${pestañaInactivaClass}`
+                  }
+                  onClick={() => setPestañaActiva("Informacion General")}
+                >
+                  Informacion General
+                </li>
+                <li
+                  className={
+                    pestañaActiva === "Portafolio"
+                      ? `py-4 ${pestañaActivaClass}`
+                      : `py-4 ${pestañaInactivaClass}`
+                  }
+                  onClick={() => setPestañaActiva("Portafolio")}
+                >
+                  Portafolio
+                </li>
+                <li
+                  className={
+                    pestañaActiva === "Opiniones"
+                      ? `py-4 ${pestañaActivaClass}`
+                      : `py-4 ${pestañaInactivaClass}`
+                  }
+                  onClick={() => setPestañaActiva("Opiniones")}
+                >
+                  Opiniones
+                </li>
+              </ul>
+
+              {isOwner && (
+                <button
+                  className="bg-[#f59e0b] hover:bg-[#d97706] text-white font-semibold py-2 px-6 rounded-lg text-sm shadow-md transition-all"
+                  onClick={onEditProfile}
+                >
+                  Editar Perfil
+                </button>
+              )}
+            </div>
+
+            <div className="max-w-7xl mx-auto py-8">
+              <GeneralInfo
+                generalInfo={user.workInfo!.generalInfo}
+                profilePicture={user.profilePicture}
+                name={user.name}
+                pestañaActiva={pestañaActiva}
+              />
+              <Portafolio
+                portfolioItems={user.workInfo!.portfolio}
+                pestañaActiva={pestañaActiva}
+                isOwner={isOwner}
+                onAddPortfolioItem={onAddPortfolioItem}
+              />
+              <ReviewProfile
+                reviewsProfile={user.workInfo!.reviewsProfile}
+                pestañaActiva={pestañaActiva}
+                onAddReview={onAddReview}
+                isOwner={isOwner}
+              />
+              <Contacto
+                address={user.address}
+                phone={user.phone}
+                email={user.email}
+                image={user.profilePicture}
+                pestañaActiva={pestañaActiva}
+                isOwner={isOwner}
+              />
+            </div>
           </div>
-        </div>
-
-        <div className="bg-white text-gray-500 font-semibold text-sm -mx-4 md:-mx-12 px-4 md:px-12 border-b border-gray-200">
-          <ul className="flex gap-8 max-w-7xl mx-auto list-none justify-center md:justify-start">
-            <li>
-              <button type="button" onClick={() => setActiveTab("general")} className={activeTab === "general" ? "py-4 text-[#3b82f6] border-b-2 border-[#3b82f6] cursor-pointer" : "py-4 hover:text-gray-800 transition-colors cursor-pointer"}>
-                Informacion General
-              </button>
-            </li>
-            <li>
-              <button type="button" onClick={() => setActiveTab("portafolio")} className={activeTab === "portafolio" ? "py-4 text-[#3b82f6] border-b-2 border-[#3b82f6] cursor-pointer" : "py-4 hover:text-gray-800 transition-colors cursor-pointer"}>
-                Portafolio
-              </button>
-            </li>
-            <li>
-              <button type="button" onClick={() => setActiveTab("opiniones")} className={activeTab === "opiniones" ? "py-4 text-[#3b82f6] border-b-2 border-[#3b82f6] cursor-pointer" : "py-4 hover:text-gray-800 transition-colors cursor-pointer"}>
-                Opiniones
-              </button>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      {activeTab === "general" ? <GeneralInfo /> : null}
-      {activeTab === "portafolio" ? <Portafolio /> : null}
-      {activeTab === "opiniones" ? <ReviewsPerfil /> : null}
-    </div>
-  )
+        </section>
+      )}
+    </>
+  );
 }
 
-export default PerfilUser
+export default PerfilUser;

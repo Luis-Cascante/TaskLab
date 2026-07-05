@@ -2,17 +2,11 @@ import type { worker } from "./PruebasWorkerData";
 import WorkerCard from "./WorkerCard"
 
 type TrabajadoresProps = {
-    onOpenProfile?: () => void;
+    onOpenProfile?: (worker: worker) => void;
     Workers : worker[]
 }
 
 function Trabajadores({ onOpenProfile, Workers }: TrabajadoresProps) {
-  const workers = [
-    { name: "Juan Pepe", profession: "Fontanero", location: "Macacona, Esparza", rating: "4,5" },
-    { name: "Ana Rojas", profession: "Mantenimiento", location: "Puntarenas", rating: "4,8" },
-    { name: "Luis Vargas", profession: "Construcción", location: "Miramar", rating: "4,6" },
-  ]
-
   return (
     <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
       <div className="mb-6 text-center md:text-left">
@@ -22,7 +16,11 @@ function Trabajadores({ onOpenProfile, Workers }: TrabajadoresProps) {
 
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {Workers.map((worker, index) => (
-          <WorkerCard key={index} onOpenProfile={onOpenProfile} worker={worker} />
+          <WorkerCard
+            key={index}
+            onOpenProfile={() => onOpenProfile?.(worker)}
+            worker={worker}
+          />
         ))}
       </section>
     </main>

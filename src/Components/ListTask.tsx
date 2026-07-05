@@ -1,28 +1,80 @@
+import { useMemo, useState } from "react"
 import TaskCard from "../Components/TaskCard"
 import type { task } from "./PruebasTaskData"
 
 type ListTaskProps = {
-  onOpenTask?: () => void
+  onOpenTask?: (task: task) => void
   onPublish?: () => void
-  Tasks : task[]
+  Tasks: task[]
 }
 
-const tasks = [
-  {
-    image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=150&auto=format&fit=crop",
-    title: "Titulo del trabajo",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=150&auto=format&fit=crop",
-    title: "Titulo del trabajo",
-  },
-  {
-    image: "https://images.unsplash.com/photo-1504307651254-35680f356dfd?q=80&w=150&auto=format&fit=crop",
-    title: "Titulo del trabajo",
-  },
-]
+const normalizeText = (value: string) =>
+  value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
 
 function ListTask({ Tasks, onOpenTask, onPublish }: ListTaskProps) {
+  const [searchText, setSearchText] = useState("")
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
+  const [selectedAgreements, setSelectedAgreements] = useState<string[]>([])
+
+  const categories = useMemo(
+    () => Array.from(new Set(Tasks.map((task) => task.category))),
+    [Tasks],
+  )
+
+  const agreements = useMemo(
+    () => Array.from(new Set(Tasks.map((task) => task.agreement))),
+    [Tasks],
+  )
+
+  const filteredTasks = useMemo(() => {
+    const normalizedSearch = normalizeText(searchText)
+    const normalizedCategories = selectedCategories.map(normalizeText)
+    const normalizedAgreements = selectedAgreements.map(normalizeText)
+
+    return Tasks.filter((task) => {
+      const matchesSearch = normalizedSearch === "" || [
+        task.title,
+        task.employer,
+        task.description,
+        task.location,
+        task.category,
+        task.agreement,
+      ].some((field) => normalizeText(field).includes(normalizedSearch))
+
+      const matchesCategory =
+        normalizedCategories.length === 0 ||
+        normalizedCategories.includes(normalizeText(task.category))
+
+      const matchesAgreement =
+        normalizedAgreements.length === 0 ||
+        normalizedAgreements.includes(normalizeText(task.agreement))
+
+      return matchesSearch && matchesCategory && matchesAgreement
+    })
+  }, [Tasks, searchText, selectedCategories, selectedAgreements])
+
+  const toggleFilter = (
+    value: string,
+    selectedValues: string[],
+    setSelectedValues: React.Dispatch<React.SetStateAction<string[]>>,
+  ) => {
+    setSelectedValues(
+      selectedValues.includes(value)
+        ? selectedValues.filter((selectedValue) => selectedValue !== value)
+        : [...selectedValues, value],
+    )
+  }
+
+  const clearFilters = () => {
+    setSearchText("")
+    setSelectedCategories([])
+    setSelectedAgreements([])
+  }
+
   return (
     <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
       <div className="flex justify-between items-center mb-6 relative">
@@ -45,9 +97,11 @@ function ListTask({ Tasks, onOpenTask, onPublish }: ListTaskProps) {
       <div className="bg-[#f59e0b] p-3 rounded-2xl shadow-lg">
         <div className="w-full flex gap-2 mb-3">
           <div className="relative flex-1">
-            <input 
-              type="text" 
-              placeholder="search..." 
+            <input
+              type="text"
+              value={searchText}
+              onChange={(event) => setSearchText(event.target.value)}
+              placeholder="Buscar por título, ubicación, categoría o contrato..."
               className="w-full pl-4 pr-12 py-2 rounded-xl bg-[#e5e7eb] border-none text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#1d61a1]"
             />
             <button type="button" className="absolute right-1 top-1/2 -translate-y-1/2 bg-[#1d61a1] hover:bg-[#154675] text-white p-1.5 rounded-lg transition-colors">
@@ -58,19 +112,35 @@ function ListTask({ Tasks, onOpenTask, onPublish }: ListTaskProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 /*gap-4*/">
-          <aside className="bg-[#111e38] text-white p-5 /*rounded-xl*/ flex flex-col gap-6 ">
-            <h4 className="text-xl font-bold text-[#f59e0b] tracking-wide border-b border-gray-700 pb-2">
-              Filtros
-            </h4>
+        <div className="grid grid-cols-1 md:grid-cols-4">
+          <aside className="bg-[#111e38] text-white p-5 flex flex-col gap-6">
+            <div className="flex items-center justify-between gap-3 border-b border-gray-700 pb-2">
+              <h4 className="text-xl font-bold text-[#f59e0b] tracking-wide">
+                Filtros
+              </h4>
+              {(searchText || selectedCategories.length > 0 || selectedAgreements.length > 0) && (
+                <button
+                  type="button"
+                  onClick={clearFilters}
+                  className="text-xs font-bold text-white hover:text-[#f59e0b] transition-colors"
+                >
+                  Limpiar
+                </button>
+              )}
+            </div>
 
             <div className="flex flex-col gap-3">
               <h5 className="text-base font-bold text-[#f59e0b]">Categorías</h5>
               <div className="flex flex-col gap-2.5 pl-1">
-                {["Hogar", "Mantenimiento", "Construccion", "Tutoria"].map((cat) => (
-                  <label key={cat} className="flex items-center gap-3 text-sm font-semibold cursor-pointer select-none hover:text-gray-300 transition-colors">
-                    <input type="checkbox" className="w-4 h-4 rounded text-[#1d61a1] focus:ring-0 cursor-pointer accent-[#1d61a1]" />
-                    {cat}
+                {categories.map((category) => (
+                  <label key={category} className="flex items-center gap-3 text-sm font-semibold cursor-pointer select-none hover:text-gray-300 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={selectedCategories.includes(category)}
+                      onChange={() => toggleFilter(category, selectedCategories, setSelectedCategories)}
+                      className="w-4 h-4 rounded text-[#1d61a1] focus:ring-0 cursor-pointer accent-[#1d61a1]"
+                    />
+                    {category}
                   </label>
                 ))}
               </div>
@@ -79,24 +149,35 @@ function ListTask({ Tasks, onOpenTask, onPublish }: ListTaskProps) {
             <div className="flex flex-col gap-3">
               <h5 className="text-base font-bold text-[#f59e0b]">Contrato</h5>
               <div className="flex flex-col gap-2.5 pl-1">
-                {[
-                  { id: "hora", label: "Por hora" },
-                  { id: "unico", label: "Pago unico" },
-                  { id: "largo", label: "Contrato largo" },
-                ].map((contract) => (
-                  <label key={contract.id} className="flex items-center gap-3 text-sm font-semibold cursor-pointer select-none hover:text-gray-300 transition-colors">
-                    <input type="checkbox" className="w-4 h-4 rounded text-[#1d61a1] focus:ring-0 cursor-pointer accent-[#1d61a1]" />
-                    {contract.label}
+                {agreements.map((agreement) => (
+                  <label key={agreement} className="flex items-center gap-3 text-sm font-semibold cursor-pointer select-none hover:text-gray-300 transition-colors">
+                    <input
+                      type="checkbox"
+                      checked={selectedAgreements.includes(agreement)}
+                      onChange={() => toggleFilter(agreement, selectedAgreements, setSelectedAgreements)}
+                      className="w-4 h-4 rounded text-[#1d61a1] focus:ring-0 cursor-pointer accent-[#1d61a1]"
+                    />
+                    {agreement}
                   </label>
                 ))}
               </div>
             </div>
           </aside>
 
-          <section className="md:col-span-3 flex flex-col gap-4 bg-[#e5e7eb] p-4 /*rounded-xl*/">
-            {Tasks.map((task) => (
-              <TaskCard key={task.id} task={task} onOpenTask={onOpenTask} />
-            ))}
+          <section className="md:col-span-3 flex flex-col gap-4 bg-[#e5e7eb] p-4">
+            <p className="text-sm font-semibold text-gray-700">
+              {filteredTasks.length} resultado{filteredTasks.length === 1 ? "" : "s"} encontrado{filteredTasks.length === 1 ? "" : "s"}
+            </p>
+
+            {filteredTasks.length > 0 ? (
+              filteredTasks.map((task) => (
+                <TaskCard key={task.id} task={task} onOpenTask={() => onOpenTask?.(task)} />
+              ))
+            ) : (
+              <div className="rounded-xl bg-white p-6 text-center text-gray-600 shadow-sm">
+                No hay trabajos que coincidan con los filtros seleccionados.
+              </div>
+            )}
           </section>
         </div>
       </div>

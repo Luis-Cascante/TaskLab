@@ -5,8 +5,10 @@ import TaskCard from "./TaskCard"
     type SelectedTaskProps = {
       onBack?: () => void
       onContact?: () => void
-      onOpenProfile?: () => void
-      onOpenTask?: () => void
+      // Recibe el employerId de la tarea (si se conoce) para abrir el
+      // perfil real de quien la publicó, en vez de siempre el propio.
+      onOpenProfile?: (employerId?: string) => void
+      onOpenTask?: (task: task) => void
       Task: task
       Tasks: task[]
     }
@@ -44,7 +46,7 @@ import TaskCard from "./TaskCard"
                     {Task.title}
                   </h2>
                   <p className="text-xs md:text-sm font-semibold text-gray-900 bg-white/20 w-fit px-3 py-1 rounded-md">
-                    <span className="font-bold">Trabajo solicitado por:</span> <span onClick={onOpenProfile} className="cursor-pointer hover:text-yellow-400 transition-colors">
+                    <span className="font-bold">Trabajo solicitado por:</span> <span onClick={() => onOpenProfile?.(Task.employerId)} className="cursor-pointer hover:text-yellow-400 transition-colors">
                       {Task.employer}
                     </span>
                   </p>
@@ -76,8 +78,8 @@ import TaskCard from "./TaskCard"
             </div>
 
             <div className="grid grid-cols-1 gap-4">
-              {Tasks.map((task) => (
-                <TaskCard key={task.id} task={task} onOpenTask={onOpenTask} />
+              {Tasks.filter((task) => task.id !== Task.id).map((task) => (
+                <TaskCard key={task.id} task={task} onOpenTask={() => onOpenTask?.(task)} />
               ))}
             </div>
           </div>

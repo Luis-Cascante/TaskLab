@@ -8,7 +8,7 @@ import type { task } from "./PruebasTaskData"
 type MainHubProps = {
   onPublish?: () => void
   onListTasks?: () => void
-  onOpenTask?: () => void
+  onOpenTask?: (task: task) => void
   Tasks : task[]
 }
 
@@ -84,7 +84,7 @@ function MainHub({ onPublish, onListTasks, onOpenTask, Tasks }: MainHubProps) {
           >
             {Tasks.map((task) => (
               <SwiperSlide key={task.id} className="snap-start">
-                <TaskCardV2 task={task} onOpenTask={onOpenTask}/>
+                <TaskCardV2 key={task.id} task={task} onOpenTask={() => onOpenTask?.(task)} />
               </SwiperSlide>
             ))}
               
