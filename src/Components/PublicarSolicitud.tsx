@@ -7,9 +7,9 @@ function PublicarSolicitud({ onCancel }: PublicarSolicitudProps) {
     <div className="min-h-screen w-full flex flex-col md:flex-row font-sans">
       <section className="hidden md:flex md:w-1/2 bg-[#111e38] items-center justify-center p-12">
         <img 
-          src="/assets/login.png" 
+          src="src/assets/img/Logo_TaskLab.png" 
           alt="Logo TaskLab" 
-          className="w-2/3 h-auto object-contain opacity-80" 
+          className="w-2/6 h-auto object-contain opacity-80" 
         />
       </section>
 
@@ -24,7 +24,7 @@ function PublicarSolicitud({ onCancel }: PublicarSolicitudProps) {
           </button>
         </div>
         <div className="w-full max-w-sm">
-          <h1 className="text-2xl font-bold text-center text-black mb-10">
+          <h1 className="text-3xl font-bold text-center text-black mb-10">
             Crea tu solicitud de trabajo
           </h1>
 

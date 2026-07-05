@@ -1,4 +1,8 @@
 import { useState } from "react"
+import 'swiper/swiper-bundle.css'
+
+import Login from "./Components/Login"
+import Register from "./Components/Register"
 import Footer from "./Components/Footer"
 import Header from "./Components/Header"
 import Chat from "./Components/Chat"
@@ -9,30 +13,73 @@ import PublicarSolicitud from "./Components/PublicarSolicitud"
 import SelectedTask from "./Components/SelectedTask"
 import Trabajadores from "./Components/Trabajadores"
 
-type MainView = "home" | "jobs" | "detail" | "workers" | "profile" | "chat" | "publish"
+import tasks from "./Components/PruebasTaskData"
+import workers from "./Components/PruebasWorkerData"
+
+
+type MainView = "home" | "jobs" | "detail" | "workers" | "profile" | "chat" | "publish" | "login" | "register" 
 
 function App() {
-  const [activeView, setActiveView] = useState<MainView>("jobs")
+  const [tasksList] = useState(tasks)
+  const [workersList] = useState(workers)
+  const [selectedTask, setSelectedTask] = useState(tasks[0])
 
-  if (activeView === "publish") {
+  const [activeView, setActiveView] = useState<MainView>("register")
+
+  const handleOpenTask = (task: typeof tasks[number]) => {
+    setSelectedTask(task)
+    setActiveView("detail")
+  }
+
+  if (activeView === "publish" ) {
     return <PublicarSolicitud onCancel={() => setActiveView("jobs")} />
+  }
+
+  if (activeView === "login" ) {
+    return <Login 
+    onChangeRegister={() => setActiveView("register")} 
+    onLoginSuccess={() => setActiveView("home")} />
+  }
+
+  if (activeView === "register" ) {
+    return <Register 
+    onChangeLogin={() => setActiveView("login")} 
+    onRegisterSuccess={() => setActiveView("home")} />
   }
 
   const renderContent = () => {
     switch (activeView) {
       case "home":
-        return <MainHub />
+        return <MainHub 
+        onPublish={() => setActiveView("publish")} 
+        onListTasks={() => setActiveView("jobs")} 
+        onOpenTask={handleOpenTask} 
+        Tasks={tasksList}
+        />
       case "detail":
-        return <SelectedTask onBack={() => setActiveView("jobs")} onContact={() => setActiveView("chat")} />
+        return <SelectedTask 
+        onBack={() => setActiveView("jobs")} 
+        onContact={() => setActiveView("chat")} 
+        onOpenProfile={() => setActiveView("profile")} 
+        onOpenTask={handleOpenTask}  
+        Task={selectedTask} 
+        Tasks={tasksList}
+        />
       case "workers":
-        return <Trabajadores />
+        return <Trabajadores 
+        onOpenProfile={() => setActiveView("profile")}
+        Workers={workersList} />
       case "profile":
         return <PerfilUser />
       case "chat":
         return <Chat />
       case "jobs":
       default:
-        return <ListTask onOpenTask={() => setActiveView("detail")} onPublish={() => setActiveView("publish")} />
+        return <ListTask 
+        onOpenTask={handleOpenTask} 
+        onPublish={() => setActiveView("publish")} 
+        Tasks={tasksList}
+        />
     }
   }
 

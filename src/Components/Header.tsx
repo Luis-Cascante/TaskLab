@@ -1,6 +1,6 @@
 type HeaderProps = {
-  activeView: "home" | "jobs" | "detail" | "workers" | "profile" | "chat" | "publish"
-  onNavigate: (view: "home" | "jobs" | "detail" | "workers" | "profile" | "chat" | "publish") => void
+  activeView: "home" | "jobs" | "detail" | "workers" | "profile" | "chat" | "publish" | "login" | "register"
+  onNavigate: (view: "home" | "jobs" | "detail" | "workers" | "profile" | "chat" | "publish" | "login" | "register") => void
 }
 
 const navigationItems = [
@@ -14,10 +14,8 @@ function Header({ activeView, onNavigate }: HeaderProps) {
   return (
     <header className="bg-[#f0f2f5] text-[#1e293b] py-4 px-8 flex justify-between items-center font-medium shadow-sm border-b border-gray-200">
       <button type="button" onClick={() => onNavigate("home")} className="flex items-center gap-2 text-left">
-        <span className="text-[#111e38] text-2xl font-black tracking-tighter border-b-2 border-[#3b82f6]">
-          T
-        </span>
-        <h2 className="text-xl font-bold tracking-wider text-[#111e38] hidden sm:inline">Tasklab</h2>
+        <img src="src/assets/img/Logo_TaskLab.png" alt="TaskLab" className="w-6 h-auto object-contain" />
+        <h2 className="text-xl font-bold tracking-wider text-[#111e38] hidden sm:inline">TaskLab</h2>
       </button>
 
       <nav>

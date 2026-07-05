@@ -58,11 +58,6 @@ function PerfilUser() {
                 Opiniones
               </button>
             </li>
-            <li>
-              <button type="button" className="py-4 hover:text-gray-800 transition-colors cursor-pointer">
-                Contacto
-              </button>
-            </li>
           </ul>
         </div>
       </section>
