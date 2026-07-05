@@ -4,7 +4,7 @@ function GeneralInfo() {
       <div className="space-y-6">
         <div>
           <h3 className="text-lg font-bold text-gray-900 mb-1">About Me:</h3>
-          <p className="text-sm text-gray-600 leading-relaxed font-light">PAPAYA</p>
+          <p className="text-sm text-gray-600 leading-relaxed font-light">Lo quiero Miranda</p>
         </div>
 
         <div>
