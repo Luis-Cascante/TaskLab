@@ -9,181 +9,251 @@ import Chat from "./Components/Chat"
 import ListTask from "./Components/ListTask"
 import MainHub from "./Components/MainHub"
 import PerfilUser from "./Components/PerfilUser"
+import EditProfile from "./Components/EditProfile"
+import AddPortfolioItem from "./Components/AddPortfolioItem"
 import PublicarSolicitud from "./Components/PublicarSolicitud"
 import SelectedTask from "./Components/SelectedTask"
 import Trabajadores from "./Components/Trabajadores"
 
 import tasks from "./Components/PruebasTaskData"
+import type { task } from "./Components/PruebasTaskData"
 import workers from "./Components/PruebasWorkerData"
+import type { worker } from "./Components/PruebasWorkerData"
 
-type MainView = "home" | "jobs" | "detail" | "workers" | "profile" | "chat" | "publish" | "login" | "register"
-
-type ApplicationStatus = "pendiente" | "rechazado" | "contratado"
-
-type Application = {
-  taskId: number
-  worker: string
-  status: ApplicationStatus
-}
+import { workerToUser } from "./utils/workerToUser"
+import { useAuth } from "./context/AuthContext"
+import type { User, ReviewProfile, MainView, NewPortfolioItemData } from "./types"
 
 function App() {
-  const currentUser = "Pepe Juan"
+  const auth = useAuth()
+
   const [tasksList, setTasksList] = useState(tasks)
   const [workersList] = useState(workers)
   const [selectedTask, setSelectedTask] = useState(tasks[0])
-  const [applications, setApplications] = useState<Application[]>([
-    { taskId: 1, worker: currentUser, status: "pendiente" },
-  ])
 
   const [activeView, setActiveView] = useState<MainView>("register")
+
+  // Perfiles "de terceros" que NO son cuentas reales: se derivan una sola
+  // vez de la lista de workers. Son mutables porque cualquiera puede
+  // dejarles una reseña. Las cuentas reales (tú y quien se registre) viven
+  // en AuthContext, no aquí.
+  const [usersList, setUsersList] = useState<User[]>(() => workersList.map(workerToUser))
+
+  // Qué perfil se está viendo actualmente en la pestaña "profile".
+  const [selectedProfileId, setSelectedProfileId] = useState<string>(auth.loggedInUser.id)
+
+  // Busca primero entre las cuentas reales (tú u otro usuario registrado)
+  // y, si no aparece ahí, entre los workers de prueba.
+  const selectedUser: User =
+    auth.findUserById(selectedProfileId) ??
+    usersList.find((u) => u.id === selectedProfileId) ??
+    auth.loggedInUser
+
+  const isOwnerProfile = selectedUser.id === auth.loggedInUser.id
+
+  const handleLogin = (cedula: string, password: string) => {
+    const result = auth.login(cedula, password)
+    if (result.ok) {
+      setActiveView("home")
+    }
+    return result
+  }
+
+  const handleRegister = (data: Parameters<typeof auth.register>[0]) => {
+    const result = auth.register(data)
+    if (result.ok) {
+      setActiveView("home")
+    }
+    return result
+  }
 
   const handleOpenTask = (task: typeof tasks[number]) => {
     setSelectedTask(task)
     setActiveView("detail")
   }
 
-  const handleAddTask = () => {
-    setActiveView("publish")
+  const handlePublishTask = (newTask: Omit<task, "id">) => {
+    setTasksList((currentTasks) => {
+      const nextId = currentTasks.length > 0
+        ? Math.max(...currentTasks.map((task) => task.id)) + 1
+        : 1
+      return [...currentTasks, { ...newTask, id: nextId }]
+    })
+    setActiveView("jobs")
   }
 
-  const handleEditTask = (taskToEdit: typeof tasks[number]) => {
-    const title = window.prompt("Editar título", taskToEdit.title)
-    if (!title?.trim()) return
-
-    const description = window.prompt("Editar descripción", taskToEdit.description) ?? taskToEdit.description
-    const location = window.prompt("Editar ubicación", taskToEdit.location) ?? taskToEdit.location
-    const category = window.prompt("Editar categoría", taskToEdit.category) ?? taskToEdit.category
-    const agreement = window.prompt("Editar tipo de contrato", taskToEdit.agreement) ?? taskToEdit.agreement
-
-    setTasksList((prev) =>
-      prev.map((task) =>
-        task.id === taskToEdit.id
-          ? {
-              ...task,
-              title: title.trim(),
-              description: description.trim() || taskToEdit.description,
-              location: location.trim() || taskToEdit.location,
-              category: category.trim() || taskToEdit.category,
-              agreement: agreement.trim() || taskToEdit.agreement,
-            }
-          : task,
-      ),
-    )
-
-    setSelectedTask((current) =>
-      current.id === taskToEdit.id
-        ? {
-            ...current,
-            title: title.trim(),
-            description: description.trim() || current.description,
-            location: location.trim() || current.location,
-            category: category.trim() || current.category,
-            agreement: agreement.trim() || current.agreement,
-          }
-        : current,
-    )
+  // Al elegir "Perfil" desde el Header, siempre volvemos al perfil propio.
+  // Al abrir el perfil de un trabajador desde Trabajadores, se selecciona ese worker.
+  const handleNavigate = (view: MainView) => {
+    if (view === "profile") {
+      setSelectedProfileId(auth.loggedInUser.id)
+    }
+    setActiveView(view)
   }
 
-  const handleDeleteTask = (taskId: number) => {
-    setTasksList((prev) => prev.filter((task) => task.id !== taskId))
-    setApplications((prev) => prev.filter((app) => app.taskId !== taskId))
+  const handleOpenWorkerProfile = (worker: worker) => {
+    setSelectedProfileId(`worker-${worker.id}`)
     setActiveView("profile")
   }
 
-  const handleApply = (taskId: number) => {
-    const task = tasksList.find((task) => task.id === taskId)
-    if (!task) return
-    if (task.employer === currentUser) return
-    if (applications.some((app) => app.taskId === taskId && app.worker === currentUser)) return
-
-    setApplications((prev) => [...prev, { taskId, worker: currentUser, status: "pendiente" }])
+  // Abre el perfil de quien publicó la tarea, si se conoce su id real
+  // (solo lo tienen las tareas publicadas por ti durante esta sesión).
+  // Si no se conoce, vuelve al comportamiento anterior: tu propio perfil.
+  const handleOpenTaskEmployerProfile = (employerId?: string) => {
+    setSelectedProfileId(employerId ?? auth.loggedInUser.id)
+    setActiveView("profile")
   }
 
-  const handleHireApplicant = (taskId: number, worker: string) => {
-    setApplications((prev) =>
-      prev.map((app) => {
-        if (app.taskId !== taskId) return app
-        if (app.worker === worker) return { ...app, status: "contratado" }
-        if (app.status === "pendiente") return { ...app, status: "rechazado" }
-        return app
-      }),
+  const handleLogout = () => {
+    auth.logout()
+    setActiveView("login")
+  }
+
+  const handleSaveProfile = (updatedUser: User) => {
+    auth.updateLoggedInUser(() => updatedUser)
+    setActiveView("profile")
+  }
+
+  // Agrega un trabajo nuevo al portafolio del usuario logueado.
+  // La fecha y la calificación NO las escribe el usuario: se generan aquí.
+  const handleAddPortfolioItem = (item: NewPortfolioItemData) => {
+    auth.updateLoggedInUser((prev) =>
+      prev.workInfo
+        ? {
+            ...prev,
+            workInfo: {
+              ...prev.workInfo,
+              portfolio: [
+                ...prev.workInfo.portfolio,
+                {
+                  ...item,
+                  date: new Date().toISOString().slice(0, 10),
+                  // Sin calificar todavía: no hay ninguna reseña de cliente
+                  // asociada a este trabajo recién agregado.
+                  rating: 0,
+                },
+              ],
+            },
+          }
+        : prev
     )
+    setActiveView("profile")
   }
 
-  const handleRejectApplicant = (taskId: number, worker: string) => {
-    setApplications((prev) =>
-      prev.map((app) =>
-        app.taskId === taskId && app.worker === worker ? { ...app, status: "rechazado" } : app,
-      ),
-    )
+  // Agrega la reseña al perfil que se está viendo, sea quien sea: tú mismo,
+  // otra cuenta registrada, o uno de los workers de prueba.
+  const handleAddReview = (reviewText: string, rating: number) => {
+    const newReview: ReviewProfile = {
+      id: String(Date.now()),
+      idUser: auth.loggedInUser.id,
+      image: auth.loggedInUser.profilePicture,
+      name: auth.loggedInUser.name,
+      rating,
+      review: reviewText,
+    }
+
+    const addReviewToWorkInfo = (user: User): User =>
+      user.workInfo
+        ? {
+            ...user,
+            workInfo: {
+              ...user.workInfo,
+              reviews: user.workInfo.reviews + 1,
+              reviewsProfile: [...user.workInfo.reviewsProfile, newReview],
+            },
+          }
+        : user
+
+    const isRegisteredAccount = !!auth.findUserById(selectedProfileId)
+
+    if (isRegisteredAccount) {
+      auth.updateUserById(selectedProfileId, addReviewToWorkInfo)
+    } else {
+      setUsersList((prev) =>
+        prev.map((u) => (u.id === selectedProfileId ? addReviewToWorkInfo(u) : u))
+      )
+    }
   }
 
-  const publishedTasks = tasksList.filter((task) => task.employer === currentUser)
-  const appliedTasks = applications
-    .map((app) => {
-      const task = tasksList.find((task) => task.id === app.taskId)
-      return task ? { task, status: app.status } : null
-    })
-    .filter(Boolean) as { task: typeof tasks[number]; status: ApplicationStatus }[]
+  if (activeView === "publish") {
+    return <PublicarSolicitud
+    onCancel={() => setActiveView("jobs")}
+    onSubmit={handlePublishTask}
+    currentUserId={auth.loggedInUser.id}
+    currentUserName={auth.loggedInUser.name} />
+  }
+
+  if (activeView === "login") {
+    return <Login
+    onChangeRegister={() => setActiveView("register")}
+    onLogin={handleLogin} />
+  }
+
+  if (activeView === "register") {
+    return <Register
+    onChangeLogin={() => setActiveView("login")}
+    onRegister={handleRegister} />
+  }
 
   const renderContent = () => {
     switch (activeView) {
       case "home":
-        return (
-          <MainHub
-            onPublish={() => setActiveView("publish")}
-            onListTasks={() => setActiveView("jobs")}
-            onOpenTask={handleOpenTask}
-            Tasks={tasksList}
-          />
-        )
+        return <MainHub
+        onPublish={() => setActiveView("publish")}
+        onListTasks={() => setActiveView("jobs")}
+        onOpenTask={handleOpenTask}
+        Tasks={tasksList}
+        />
       case "detail":
-        return (
-          <SelectedTask
-            currentUser={currentUser}
-            applications={applications}
-            onBack={() => setActiveView("jobs")}
-            onApply={handleApply}
-            onHireApplicant={handleHireApplicant}
-            onRejectApplicant={handleRejectApplicant}
-            onDeleteTask={handleDeleteTask}
-            onEditTask={handleEditTask}
-            onOpenProfile={() => setActiveView("profile")}
-            onOpenTask={handleOpenTask}
-            Task={selectedTask}
-            Tasks={tasksList}
-          />
-        )
+        return <SelectedTask
+        onBack={() => setActiveView("jobs")}
+        onContact={() => setActiveView("chat")}
+        onOpenProfile={handleOpenTaskEmployerProfile}
+        onOpenTask={handleOpenTask}
+        Task={selectedTask}
+        Tasks={tasksList}
+        />
       case "workers":
-        return <Trabajadores onOpenProfile={() => setActiveView("profile")} Workers={workersList} />
+        return <Trabajadores
+        onOpenProfile={handleOpenWorkerProfile}
+        Workers={workersList} />
       case "profile":
-        return (
-          <PerfilUser
-            currentUser={currentUser}
-            publishedTasks={publishedTasks}
-            appliedTasks={appliedTasks}
-            onOpenTask={handleOpenTask}
-            onAddTask={handleAddTask}
-          />
-        )
+        return <PerfilUser
+        user={selectedUser}
+        isOwner={isOwnerProfile}
+        onEditProfile={() => setActiveView("edit-profile")}
+        onAddReview={handleAddReview}
+        onAddPortfolioItem={() => setActiveView("add-portfolio-item")}
+        />
+      case "edit-profile":
+        return <EditProfile
+        user={auth.loggedInUser}
+        onSave={handleSaveProfile}
+        onCancel={() => setActiveView("profile")}
+        />
+      case "add-portfolio-item":
+        return <AddPortfolioItem
+        onCancel={() => setActiveView("profile")}
+        onSubmit={handleAddPortfolioItem}
+        />
       case "chat":
         return <Chat />
-      case "publish":
-        return <PublicarSolicitud onCancel={() => setActiveView("jobs")} />
-      case "login":
-        return <Login onChangeRegister={() => setActiveView("register")} onLoginSuccess={() => setActiveView("home")} />
-      case "register":
-        return <Register onChangeLogin={() => setActiveView("login")} onRegisterSuccess={() => setActiveView("home")} />
       case "jobs":
       default:
-        return <ListTask onOpenTask={handleOpenTask} onPublish={() => setActiveView("publish")} Tasks={tasksList} />
+        return <ListTask
+        onOpenTask={handleOpenTask}
+        onPublish={() => setActiveView("publish")}
+        Tasks={tasksList}
+        />
     }
   }
 
   return (
     <div className="min-h-screen bg-gray-100 font-sans flex flex-col justify-between">
-      <Header activeView={activeView} onNavigate={setActiveView} />
-      <main className="flex-1">{renderContent()}</main>
+      <Header activeView={activeView} onNavigate={handleNavigate} onLogout={handleLogout} />
+      <main className="flex-1">
+        {renderContent()}
+      </main>
       <Footer />
     </div>
   )

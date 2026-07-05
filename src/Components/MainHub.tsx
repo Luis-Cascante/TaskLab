@@ -1,5 +1,8 @@
 import { Swiper, SwiperSlide } from 'swiper/react';
+import { Swiper as SwiperType } from 'swiper';
+
 import TaskCardV2 from "../Components/TaskCardV2"
+import { useState } from 'react';
 import type { task } from "./PruebasTaskData"
 
 type MainHubProps = {
@@ -11,6 +14,7 @@ type MainHubProps = {
 
 function MainHub({ onPublish, onListTasks, onOpenTask, Tasks }: MainHubProps) {
 
+  const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
 
   return (
     <div>
@@ -76,10 +80,11 @@ function MainHub({ onPublish, onListTasks, onOpenTask, Tasks }: MainHubProps) {
             className="flex gap-3 overflow-x-auto w-full pb-2"
             slidesPerView={3}
             loop={false}
+            onSwiper={(swiper) => setSwiperInstance(swiper)}
           >
             {Tasks.map((task) => (
               <SwiperSlide key={task.id} className="snap-start">
-                <TaskCardV2 task={task} onOpenTask={() => onOpenTask?.(task)}/>
+                <TaskCardV2 key={task.id} task={task} onOpenTask={() => onOpenTask?.(task)} />
               </SwiperSlide>
             ))}
               

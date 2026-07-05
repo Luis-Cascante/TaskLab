@@ -2,7 +2,7 @@ import type { worker } from "./PruebasWorkerData";
 import WorkerCard from "./WorkerCard"
 
 type TrabajadoresProps = {
-    onOpenProfile?: () => void;
+    onOpenProfile?: (worker: worker) => void;
     Workers : worker[]
 }
 
@@ -16,7 +16,11 @@ function Trabajadores({ onOpenProfile, Workers }: TrabajadoresProps) {
 
       <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {Workers.map((worker, index) => (
-          <WorkerCard key={index} onOpenProfile={onOpenProfile} worker={worker} />
+          <WorkerCard
+            key={index}
+            onOpenProfile={() => onOpenProfile?.(worker)}
+            worker={worker}
+          />
         ))}
       </section>
     </main>

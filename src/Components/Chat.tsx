@@ -1,4 +1,25 @@
+import { useState, type FormEvent } from "react"
+
 function Chat() {
+  const [message, setMessage] = useState("")
+  // En memoria: los mensajes que "envías" se agregan aquí, no se persisten
+  // ni se mandan a ningún backend.
+  const [messages, setMessages] = useState([
+    { fromMe: false, text: "Hola, vi tu solicitud y me interesa ayudarte." },
+    { fromMe: true, text: "Perfecto, te comparto más detalles." },
+    { fromMe: false, text: "¿Podemos coordinar por la tarde?" },
+  ])
+
+  const handleSend = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+
+    const trimmed = message.trim()
+    if (!trimmed) return
+
+    setMessages((prev) => [...prev, { fromMe: true, text: trimmed }])
+    setMessage("")
+  }
+
   return (
     <main className="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6">
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
@@ -47,22 +68,27 @@ function Chat() {
               </div>
             </div>
 
-            <div className="flex-1 p-4 md:p-6 space-y-3 bg-gradient-to-b from-white to-gray-50">
-              <div className="max-w-xl rounded-2xl rounded-tl-sm bg-gray-100 px-4 py-3 text-sm text-gray-700">
-                Hola, vi tu solicitud y me interesa ayudarte.
-              </div>
-              <div className="max-w-xl ml-auto rounded-2xl rounded-tr-sm bg-[#1d61a1] px-4 py-3 text-sm text-white">
-                Perfecto, te comparto más detalles.
-              </div>
-              <div className="max-w-xl rounded-2xl rounded-tl-sm bg-gray-100 px-4 py-3 text-sm text-gray-700">
-                ¿Podemos coordinar por la tarde?
-              </div>
+            <div className="flex-1 p-4 md:p-6 space-y-3 bg-gradient-to-b from-white to-gray-50 overflow-y-auto">
+              {messages.map((msg, index) => (
+                <div
+                  key={index}
+                  className={
+                    msg.fromMe
+                      ? "max-w-xl ml-auto rounded-2xl rounded-tr-sm bg-[#1d61a1] px-4 py-3 text-sm text-white"
+                      : "max-w-xl rounded-2xl rounded-tl-sm bg-gray-100 px-4 py-3 text-sm text-gray-700"
+                  }
+                >
+                  {msg.text}
+                </div>
+              ))}
             </div>
 
-            <form className="border-t border-gray-200 p-4 bg-white">
+            <form onSubmit={handleSend} className="border-t border-gray-200 p-4 bg-white">
               <div className="flex gap-3">
                 <input
                   type="text"
+                  value={message}
+                  onChange={(event) => setMessage(event.target.value)}
                   placeholder="Escribe un mensaje"
                   className="flex-1 rounded-xl border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1d61a1]"
                 />

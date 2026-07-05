@@ -6,13 +6,18 @@ type WorkerCardProps = {
 }
 
 function WorkerCard({ onOpenProfile, worker }: WorkerCardProps) {
+        // Mismo patrón que utils/workerToUser.ts: no hay foto real para los
+        // workers de prueba, así que se genera una consistente por id en vez
+        // de dejar el src vacío (lo que mostraba un ícono roto).
+        const avatarUrl = `https://picsum.photos/seed/worker-${worker.id}/200/200`
+
         return (
             <>
             <article className="rounded-2xl bg-white border border-gray-200 shadow-sm overflow-hidden">
             <div className="h-24 bg-[#1d61a1]" />
             <div className="p-5 -mt-10">
               <div className="w-20 h-20 rounded-2xl border-4 border-white bg-gray-300 shadow-md overflow-hidden">
-                <img src="" alt={worker.name} className="w-full h-full object-cover" />
+                <img src={avatarUrl} alt={worker.name} className="w-full h-full object-cover" />
               </div>
               <h2 className="mt-4 text-lg font-bold text-gray-900">{worker.name}</h2>
               <p className="text-sm text-[#1d61a1] font-semibold">{worker.profession}</p>
