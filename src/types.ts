@@ -3,7 +3,6 @@ export interface GeneralInfo {
   degrees: string;
 }
 
-// Antes se llamaba "Review" y chocaba de nombre con el componente Review.tsx
 export interface PortfolioItem {
   title: string;
   image: string;
@@ -13,8 +12,6 @@ export interface PortfolioItem {
   rating: number;
 }
 
-// Datos que sí ingresa el usuario al agregar un trabajo al portafolio.
-// La fecha y la calificación las asigna el sistema, no se piden en el formulario.
 export interface NewPortfolioItemData {
   title: string;
   description: string;
@@ -55,17 +52,10 @@ export interface User {
   workInfo?: WorkInfo;
 }
 
-// Reemplaza a las rutas de TanStack Router: ahora la "pantalla" activa
-// es simplemente un valor de estado en memoria.
 export type View = "register" | "perfil" | "edit-profile";
 
-// --- Autenticación en memoria (sin backend) ---
-
-// Resultado de intentar iniciar sesión o registrarse: o todo salió bien,
-// o viene un mensaje de error para mostrarle al usuario en el formulario.
 export type AuthResult = { ok: true } | { ok: false; error: string };
 
-// Datos que recolecta el formulario de registro antes de convertirse en un User.
 export interface RegisterFormValues {
   nombre: string;
   correo: string;
@@ -73,9 +63,6 @@ export interface RegisterFormValues {
   password: string;
 }
 
-// Todas las "pantallas" de la app (reemplaza a las rutas de router).
-// Se define una sola vez aquí para que App.tsx y Header.tsx (y cualquier
-// otro componente que navegue) usen siempre el mismo conjunto de valores.
 export type MainView =
   | "home"
   | "jobs"
@@ -88,3 +75,97 @@ export type MainView =
   | "publish"
   | "login"
   | "register";
+
+export type ApplicationStatus = "pendiente" | "rechazado" | "contratado";
+
+export interface TaskCategory {
+  id: string
+  name: string
+}
+
+export interface TaskAgreement {
+  id: string
+  name: string
+}
+
+export interface EmployerProfile {
+  avatar: string | null
+  address: string | null
+  profession: string | null
+  availability: boolean | null
+  rating: number | null
+}
+
+export interface TaskEmployer {
+  id: string
+  name: string
+  email: string
+  created_at: string
+  updated_at: string
+  profile: EmployerProfile | null
+}
+
+export interface BackendTask {
+  id: string
+  title: string
+  description: string | null
+  location: string
+  image: string | null
+  employer: TaskEmployer
+  employer_id: string
+  category: TaskCategory
+  category_id: string
+  agreement: TaskAgreement
+  agreement_id: string
+  created_at: string
+  updated_at: string
+}
+
+export interface BackendTaskRaw {
+  id: string
+  title: string
+  description: string | null
+  location: string
+  image: string | null
+  employer_id: string
+  category_id: string
+  agreement_id: string
+  created_at: string
+  updated_at: string
+}
+
+export type BackendApplicationStatus = 'pending' | 'accepted' | 'rejected'
+
+export interface BackendApplication {
+  id: string
+  task_id: string
+  applicant_id: string
+  status: BackendApplicationStatus
+  created_at: string
+  updated_at: string
+}
+
+export interface BackendApplicationWithApplicant extends BackendApplication {
+  applicant: {
+    id: string
+    name: string
+    email: string
+    created_at: string
+    updated_at: string
+    profile: { avatar: string | null; profession: string | null; address: string | null; rating: number | null } | null
+    vocations: Array<{ vocation: { name: string } }>
+  }
+}
+
+export interface BackendApplicationWithTask extends BackendApplication {
+  task: BackendTask
+}
+
+export interface Application {
+  taskId: string;        
+  applicantId: string;
+  applicantName: string;
+  applicantImage: string;
+  status: ApplicationStatus;
+  applicationId: string; 
+}

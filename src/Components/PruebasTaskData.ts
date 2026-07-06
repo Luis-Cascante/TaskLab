@@ -2,15 +2,12 @@ export type task = {
   id: number;
   title: string;
   employer: string;
-  // Id del usuario real (registeredUsers) que publicó la tarea, si se conoce.
-  // Las tareas de prueba no lo tienen porque "Manuel Perez", "Pepe Juan", etc.
-  // no corresponden a ninguna cuenta registrada; solo las tareas que tú
-  // publicas desde la app en esta sesión lo incluyen (ver PublicarSolicitud.tsx).
   employerId?: string;
   description: string;
   location: string;
   category: string;
   agreement: string;
+  image?: string;
 };
 
 const tasks: task[] = [
@@ -21,7 +18,8 @@ const tasks: task[] = [
     description: "Lorem ipsum dolor sit amet consectetur. Ipsum risus sit tempor aliquet auctor. Mattis tortor eget magnis vitae dolor pulvinar. Maecenas vitae varius mauris eu. Accumsan ornare nulla hendrerit elementum. Tristique ultricies dictum interdum malesuada urna placerat eros non. Risus aliquam ut tortor posuere massa elementum at.",
     location: "Limón, Costa Rica",
     category: "Mantenimiento",
-    agreement: "Pago unico"
+    agreement: "Pago unico",
+    image: "https://example.com/image1.jpg"
   },
   {
     id: 2,
@@ -30,7 +28,8 @@ const tasks: task[] = [
     description: "Lorem ipsum dolor sit amet consectetur. Ipsum risus sit tempor aliquet auctor. Mattis tortor eget magnis vitae dolor pulvinar. Maecenas vitae varius mauris eu. Accumsan ornare nulla hendrerit elementum. Tristique ultricies dictum interdum malesuada urna placerat eros non. Risus aliquam ut tortor posuere massa elementum at.",
     location: "San José, Costa Rica",
     category: "Mantenimiento",
-    agreement: "Pago unico"
+    agreement: "Pago unico",
+    image: "https://example.com/image2.jpg"
   },
   {
     id: 3,
@@ -39,7 +38,8 @@ const tasks: task[] = [
     description: "Lorem ipsum dolor sit amet consectetur. Ipsum risus sit tempor aliquet auctor. Mattis tortor eget magnis vitae dolor pulvinar. Maecenas vitae varius mauris eu. Accumsan ornare nulla hendrerit elementum. Tristique ultricies dictum interdum malesuada urna placerat eros non. Risus aliquam ut tortor posuere massa elementum at.",
     location: "Puntarenas, Costa Rica",
     category: "Hogar",
-    agreement: "Contrato mensual"
+    agreement: "Contrato mensual",
+    image: "https://example.com/image3.jpg"
   },
   {
     id: 4,
@@ -48,7 +48,8 @@ const tasks: task[] = [
     description: "Lorem ipsum dolor sit amet consectetur. Ipsum risus sit tempor aliquet auctor. Mattis tortor eget magnis vitae dolor pulvinar. Maecenas vitae varius mauris eu. Accumsan ornare nulla hendrerit elementum. Tristique ultricies dictum interdum malesuada urna placerat eros non. Risus aliquam ut tortor posuere massa elementum at.",
     location: "San José, Costa Rica",
     category: "Construcción",
-    agreement: "Pago unico"
+    agreement: "Pago unico",
+    image: "https://example.com/image4.jpg"
   },
   {
     id: 5,
@@ -57,7 +58,8 @@ const tasks: task[] = [
     description: "Lorem ipsum dolor sit amet consectetur. Ipsum risus sit tempor aliquet auctor. Mattis tortor eget magnis vitae dolor pulvinar. Maecenas vitae varius mauris eu. Accumsan ornare nulla hendrerit elementum. Tristique ultricies dictum interdum malesuada urna placerat eros non. Risus aliquam ut tortor posuere massa elementum at.",
     location: "Heredia, Costa Rica",
     category: "Tutoria",
-    agreement: "Pago por hora"
+    agreement: "Pago por hora",
+    image: "https://example.com/image5.jpg"
   },
   {
     id: 6,
@@ -66,7 +68,8 @@ const tasks: task[] = [
     description: "Lorem ipsum dolor sit amet consectetur. Ipsum risus sit tempor aliquet auctor. Mattis tortor eget magnis vitae dolor pulvinar. Maecenas vitae varius mauris eu. Accumsan ornare nulla hendrerit elementum. Tristique ultricies dictum interdum malesuada urna placerat eros non. Risus aliquam ut tortor posuere massa elementum at.",
     location: "Cartago, Costa Rica",
     category: "Tutoria",
-    agreement: "Contrato mensual"
+    agreement: "Contrato mensual",
+    image: "https://example.com/image6.jpg"
   }
 ];
 

@@ -1,0 +1,271 @@
+================================================================================
+  TASKLAB BACKEND — DATOS DE PRUEBA PARA POSTMAN
+================================================================================
+
+NOTAS GENERALES:
+  - Corre "npm run db:seed" antes de empezar para tener datos base.
+  - Las rutas marcadas con [AUTH] requieren el header:
+      Key:   Authorization
+      Value: Bearer <token>
+  - El token lo obtienes del response de /login o /register.
+  - Los IDs entre <> son dinámicos — cópialos de los responses anteriores.
+  - Base URL de ejemplo: http://localhost:3000/api
+
+================================================================================
+  1. AUTH
+================================================================================
+
+── POST /api/auth/register ─────────────────────────────────────────────────────
+Body (JSON):
+{
+  "name":     "Roberto Solís",
+  "email":    "roberto@example.com",
+  "cedula":   "404440444",
+  "password": "password123"
+}
+
+Respuesta esperada: 201 — token + datos del usuario creado.
+Guarda el token para las rutas [AUTH].
+
+── POST /api/auth/login ─────────────────────────────────────────────────────────
+Con usuario del seed:
+{
+  "cedula":   "101110111",
+  "password": "password123"
+}
+
+Otros usuarios del seed:
+  Carlos → cedula: "202220222"
+  Lucía  → cedula: "303330333"
+
+Respuesta esperada: 200 — token + datos del usuario.
+
+================================================================================
+  2. USUARIOS  [AUTH requerido en todas]
+================================================================================
+
+── GET /api/users ───────────────────────────────────────────────────────────────
+Sin body. Sin params.
+Respuesta esperada: 200 — array con todos los usuarios (sin password ni cédula).
+
+── GET /api/users/:id ───────────────────────────────────────────────────────────
+Reemplaza :id con el ID de un usuario obtenido del GET anterior.
+Sin body.
+Respuesta esperada: 200 — usuario con perfil, vocaciones, portafolio y reseñas.
+
+── PUT /api/users/:id ───────────────────────────────────────────────────────────
+[Solo puedes editar tu propia cuenta — usa el ID del usuario autenticado]
+Body (JSON):
+{
+  "name":     "Ana Ramírez Ugalde",
+  "email":    "ana.nueva@example.com",
+  "password": "nuevapassword123"
+}
+Todos los campos son opcionales, pero debes enviar al menos uno.
+Respuesta esperada: 200 — usuario actualizado.
+
+── PATCH /api/users/:id/profile ─────────────────────────────────────────────────
+[Solo puedes editar tu propio perfil]
+Body (form-data — no JSON, para poder adjuntar avatar):
+  description  → "Electricista con 10 años de experiencia en proyectos comerciales."
+  address      → "Desamparados, San José"
+  phone        → "8899-1234"
+  profession   → "Electricista"
+  titles       → "Técnica en Instalaciones Eléctricas"
+  availability → true
+  avatar       → [archivo de imagen opcional — tipo File en Postman]
+
+Todos los campos son opcionales — envía solo los que quieras actualizar.
+Respuesta esperada: 200 — perfil actualizado.
+
+── DELETE /api/users/:id ────────────────────────────────────────────────────────
+[Solo puedes eliminar tu propia cuenta]
+Sin body.
+Respuesta esperada: 200 — confirmación de eliminación.
+
+================================================================================
+  3. VOCACIONES  [AUTH requerido en todas]
+================================================================================
+
+IDs de vocaciones disponibles (creadas por el seed — consúltalos en GET /users):
+  Los IDs son UUIDs generados al correr el seed.
+  Para obtenerlos: GET /api/users/:id → mira el array "vocations".
+
+── POST /api/users/:id/vocations ────────────────────────────────────────────────
+[Solo puedes agregar vocaciones a tu propio perfil]
+Body (JSON):
+{
+  "vocation_id": "<uuid-de-vocacion>"
+}
+Respuesta esperada: 201 — vocación agregada.
+Error 409 si ya tenías esa vocación.
+
+── DELETE /api/users/:id/vocations/:vocationId ──────────────────────────────────
+[Solo puedes eliminar vocaciones de tu propio perfil]
+  :id         → tu ID de usuario
+  :vocationId → UUID de la vocación a quitar (obtenido del GET /users/:id)
+Sin body.
+Respuesta esperada: 200 — vocación eliminada.
+
+================================================================================
+  4. RESEÑAS  [AUTH requerido en todas]
+================================================================================
+
+── GET /api/users/:id/reviews ───────────────────────────────────────────────────
+:id → ID del trabajador cuyas reseñas quieres ver.
+Sin body.
+Respuesta esperada: 200 — array de reseñas con datos del reviewer.
+
+── POST /api/users/:id/reviews ──────────────────────────────────────────────────
+:id → ID del trabajador al que le dejas la reseña (no puede ser tu propio ID)
+Body (JSON):
+{
+  "rating": 5,
+  "review": "Excelente trabajo, muy puntual y profesional. Lo recomiendo ampliamente."
+}
+
+Más ejemplos de rating + review:
+{
+  "rating": 3,
+  "review": "Buen trabajo pero tardó más de lo acordado. El resultado final fue aceptable."
+}
+{
+  "rating": 1,
+  "review": "No cumplió con lo acordado y dejó el trabajo incompleto. No lo recomiendo."
+}
+
+Respuesta esperada: 201 — reseña creada + rating promedio recalculado en el perfil.
+Error 400 si intentas reseñarte a ti mismo.
+
+── DELETE /api/users/:id/reviews/:reviewId ──────────────────────────────────────
+:id       → ID del trabajador dueño del perfil
+:reviewId → ID de la reseña (obtenido del GET /reviews)
+[Solo puedes eliminar reseñas que tú escribiste]
+Sin body.
+Respuesta esperada: 200 — reseña eliminada + rating promedio recalculado.
+
+================================================================================
+  5. TAREAS  [AUTH requerido en todas]
+================================================================================
+
+── GET /api/tasks ───────────────────────────────────────────────────────────────
+Sin body. Filtros opcionales por query params:
+  /api/tasks?category=<uuid-categoria>
+  /api/tasks?agreement=<uuid-contrato>
+  /api/tasks?category=<uuid>&agreement=<uuid>
+
+Respuesta esperada: 200 — array de tareas con employer, categoría y contrato.
+
+── GET /api/tasks/:id ───────────────────────────────────────────────────────────
+:id → UUID de la tarea (obtenido del GET anterior).
+Sin body.
+Respuesta esperada: 200 — tarea con todas sus relaciones.
+
+── POST /api/tasks ──────────────────────────────────────────────────────────────
+Body (form-data — para poder adjuntar imagen):
+  title        → "Instalación de luminarias en oficina"
+  description  → "Necesito instalar 8 luminarias LED en una oficina de 60m²."
+  location     → "San José, Costa Rica"
+  category_id  → <uuid-categoria>   (obtenido de GET /tasks → campo category.id)
+  agreement_id → <uuid-contrato>    (obtenido de GET /tasks → campo agreement.id)
+  image        → [archivo de imagen opcional — tipo File en Postman]
+
+Respuesta esperada: 201 — tarea creada con relaciones completas.
+
+── PUT /api/tasks/:id ───────────────────────────────────────────────────────────
+[Solo el employer que publicó la tarea puede editarla]
+Body (form-data):
+  title        → "Instalación de luminarias en oficina — URGENTE"
+  description  → "Descripción actualizada. Necesito terminar antes del viernes."
+  location     → "Escazú, San José"
+  category_id  → <uuid-categoria>
+  agreement_id → <uuid-contrato>
+  image        → [opcional]
+
+Respuesta esperada: 200 — tarea actualizada.
+Error 403 si no eres el employer de esa tarea.
+
+── PATCH /api/tasks/:id ─────────────────────────────────────────────────────────
+[Solo el employer que publicó la tarea puede editarla]
+Body (form-data — envía solo lo que quieras cambiar):
+  title → "Nuevo título"
+  o
+  location → "Cartago, Costa Rica"
+
+Respuesta esperada: 200 — tarea actualizada parcialmente.
+
+── DELETE /api/tasks/:id ────────────────────────────────────────────────────────
+[Solo el employer que publicó la tarea puede eliminarla]
+Sin body.
+Respuesta esperada: 200 — tarea eliminada.
+
+================================================================================
+  6. APLICACIONES A TAREAS  [AUTH requerido en todas]
+================================================================================
+
+── GET /api/tasks/my-applications ───────────────────────────────────────────────
+Sin body. Sin params.
+Retorna todas las tareas a las que aplicó el usuario autenticado.
+Respuesta esperada: 200 — array de aplicaciones con datos de la tarea.
+
+── POST /api/tasks/:id/apply ────────────────────────────────────────────────────
+:id → UUID de la tarea a la que quieres aplicar.
+[Debes estar autenticado como un usuario diferente al employer de la tarea]
+Sin body.
+
+Flujo de prueba sugerido:
+  1. Login como Lucía (la employer del seed).
+  2. Obtén el ID de la tarea eléctrica con GET /tasks.
+  3. Login como Ana o Carlos.
+  4. Haz POST /tasks/:id/apply con el ID de esa tarea.
+
+Respuesta esperada: 201 — aplicación creada con status "pending".
+Error 400 si intentas aplicar a tu propia tarea.
+Error 409 si ya aplicaste antes.
+
+── GET /api/tasks/:id/applications ──────────────────────────────────────────────
+:id → UUID de una tarea que publicaste tú.
+[Solo el employer de la tarea puede ver las aplicaciones]
+Sin body.
+Respuesta esperada: 200 — array de aplicantes con perfil y vocaciones.
+Error 403 si no eres el employer.
+
+── PATCH /api/tasks/:id/applications/:applicationId ─────────────────────────────
+:id            → UUID de tu tarea
+:applicationId → UUID de la aplicación (obtenido del GET anterior)
+[Solo el employer puede aceptar o rechazar]
+
+Aceptar al trabajador:
+{
+  "status": "accepted"
+}
+
+Rechazar al trabajador:
+{
+  "status": "rejected"
+}
+
+Respuesta esperada: 200 — aplicación actualizada.
+NOTA: Si aceptas a uno, el backend rechaza automáticamente a los demás aplicantes.
+
+================================================================================
+  FLUJO COMPLETO DE PRUEBA SUGERIDO
+================================================================================
+
+  1.  POST /auth/login          → Login como Lucía (employer)
+  2.  GET  /tasks               → Ver tareas disponibles, copiar IDs de category y agreement
+  3.  POST /tasks               → Lucía crea una tarea nueva
+  4.  POST /auth/login          → Login como Ana (trabajadora)
+  5.  GET  /tasks               → Ana ve las tareas publicadas
+  6.  POST /tasks/:id/apply     → Ana aplica a la tarea de Lucía
+  7.  POST /auth/login          → Login como Carlos
+  8.  POST /tasks/:id/apply     → Carlos también aplica a la misma tarea
+  9.  POST /auth/login          → Login como Lucía
+  10. GET  /tasks/:id/applications     → Lucía ve los 2 aplicantes
+  11. PATCH /tasks/:id/applications/:applicationId → Lucía acepta a Ana
+                                         (Carlos queda rechazado automáticamente)
+  12. POST /auth/login          → Login como Lucía
+  13. POST /users/:anaId/reviews → Lucía deja una reseña sobre Ana
+  14. GET  /users/:anaId         → Ver el perfil actualizado de Ana con rating
+
+================================================================================

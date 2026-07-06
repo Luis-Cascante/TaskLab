@@ -2,8 +2,7 @@ import { useState, type FormEvent } from "react"
 
 function Chat() {
   const [message, setMessage] = useState("")
-  // En memoria: los mensajes que "envías" se agregan aquí, no se persisten
-  // ni se mandan a ningún backend.
+
   const [messages, setMessages] = useState([
     { fromMe: false, text: "Hola, vi tu solicitud y me interesa ayudarte." },
     { fromMe: true, text: "Perfecto, te comparto más detalles." },

@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react"
 import TaskCard from "../Components/TaskCard"
-import type { task } from "./PruebasTaskData"
+import type { BackendTask } from "../types"
 
 type ListTaskProps = {
-  onOpenTask?: (task: task) => void
+  onOpenTask?: (task: BackendTask) => void
   onPublish?: () => void
-  Tasks: task[]
+  Tasks: BackendTask[]
 }
 
 const normalizeText = (value: string) =>
@@ -17,45 +17,45 @@ const normalizeText = (value: string) =>
 
 function ListTask({ Tasks, onOpenTask, onPublish }: ListTaskProps) {
   const [searchText, setSearchText] = useState("")
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [selectedAgreements, setSelectedAgreements] = useState<string[]>([])
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([])
+  const [selectedAgreementIds, setSelectedAgreementIds] = useState<string[]>([])
 
-  const categories = useMemo(
-    () => Array.from(new Set(Tasks.map((task) => task.category))),
-    [Tasks],
-  )
+  const categories = useMemo(() => {
+    const map = new Map<string, string>()
+    Tasks.forEach((t) => map.set(t.category.id, t.category.name))
+    return Array.from(map.entries()).map(([id, name]) => ({ id, name }))
+  }, [Tasks])
 
-  const agreements = useMemo(
-    () => Array.from(new Set(Tasks.map((task) => task.agreement))),
-    [Tasks],
-  )
+  const agreements = useMemo(() => {
+    const map = new Map<string, string>()
+    Tasks.forEach((t) => map.set(t.agreement.id, t.agreement.name))
+    return Array.from(map.entries()).map(([id, name]) => ({ id, name }))
+  }, [Tasks])
 
   const filteredTasks = useMemo(() => {
     const normalizedSearch = normalizeText(searchText)
-    const normalizedCategories = selectedCategories.map(normalizeText)
-    const normalizedAgreements = selectedAgreements.map(normalizeText)
 
     return Tasks.filter((task) => {
       const matchesSearch = normalizedSearch === "" || [
         task.title,
-        task.employer,
-        task.description,
+        task.employer.name,
+        task.description ?? "",
         task.location,
-        task.category,
-        task.agreement,
+        task.category.name,
+        task.agreement.name,
       ].some((field) => normalizeText(field).includes(normalizedSearch))
 
       const matchesCategory =
-        normalizedCategories.length === 0 ||
-        normalizedCategories.includes(normalizeText(task.category))
+        selectedCategoryIds.length === 0 ||
+        selectedCategoryIds.includes(task.category.id)
 
       const matchesAgreement =
-        normalizedAgreements.length === 0 ||
-        normalizedAgreements.includes(normalizeText(task.agreement))
+        selectedAgreementIds.length === 0 ||
+        selectedAgreementIds.includes(task.agreement.id)
 
       return matchesSearch && matchesCategory && matchesAgreement
     })
-  }, [Tasks, searchText, selectedCategories, selectedAgreements])
+  }, [Tasks, searchText, selectedCategoryIds, selectedAgreementIds])
 
   const toggleFilter = (
     value: string,
@@ -64,15 +64,15 @@ function ListTask({ Tasks, onOpenTask, onPublish }: ListTaskProps) {
   ) => {
     setSelectedValues(
       selectedValues.includes(value)
-        ? selectedValues.filter((selectedValue) => selectedValue !== value)
+        ? selectedValues.filter((v) => v !== value)
         : [...selectedValues, value],
     )
   }
 
   const clearFilters = () => {
     setSearchText("")
-    setSelectedCategories([])
-    setSelectedAgreements([])
+    setSelectedCategoryIds([])
+    setSelectedAgreementIds([])
   }
 
   return (
@@ -118,7 +118,7 @@ function ListTask({ Tasks, onOpenTask, onPublish }: ListTaskProps) {
               <h4 className="text-xl font-bold text-[#f59e0b] tracking-wide">
                 Filtros
               </h4>
-              {(searchText || selectedCategories.length > 0 || selectedAgreements.length > 0) && (
+              {(searchText || selectedCategoryIds.length > 0 || selectedAgreementIds.length > 0) && (
                 <button
                   type="button"
                   onClick={clearFilters}
@@ -133,14 +133,14 @@ function ListTask({ Tasks, onOpenTask, onPublish }: ListTaskProps) {
               <h5 className="text-base font-bold text-[#f59e0b]">Categorías</h5>
               <div className="flex flex-col gap-2.5 pl-1">
                 {categories.map((category) => (
-                  <label key={category} className="flex items-center gap-3 text-sm font-semibold cursor-pointer select-none hover:text-gray-300 transition-colors">
+                  <label key={category.id} className="flex items-center gap-3 text-sm font-semibold cursor-pointer select-none hover:text-gray-300 transition-colors">
                     <input
                       type="checkbox"
-                      checked={selectedCategories.includes(category)}
-                      onChange={() => toggleFilter(category, selectedCategories, setSelectedCategories)}
+                      checked={selectedCategoryIds.includes(category.id)}
+                      onChange={() => toggleFilter(category.id, selectedCategoryIds, setSelectedCategoryIds)}
                       className="w-4 h-4 rounded text-[#1d61a1] focus:ring-0 cursor-pointer accent-[#1d61a1]"
                     />
-                    {category}
+                    {category.name}
                   </label>
                 ))}
               </div>
@@ -150,14 +150,14 @@ function ListTask({ Tasks, onOpenTask, onPublish }: ListTaskProps) {
               <h5 className="text-base font-bold text-[#f59e0b]">Contrato</h5>
               <div className="flex flex-col gap-2.5 pl-1">
                 {agreements.map((agreement) => (
-                  <label key={agreement} className="flex items-center gap-3 text-sm font-semibold cursor-pointer select-none hover:text-gray-300 transition-colors">
+                  <label key={agreement.id} className="flex items-center gap-3 text-sm font-semibold cursor-pointer select-none hover:text-gray-300 transition-colors">
                     <input
                       type="checkbox"
-                      checked={selectedAgreements.includes(agreement)}
-                      onChange={() => toggleFilter(agreement, selectedAgreements, setSelectedAgreements)}
+                      checked={selectedAgreementIds.includes(agreement.id)}
+                      onChange={() => toggleFilter(agreement.id, selectedAgreementIds, setSelectedAgreementIds)}
                       className="w-4 h-4 rounded text-[#1d61a1] focus:ring-0 cursor-pointer accent-[#1d61a1]"
                     />
-                    {agreement}
+                    {agreement.name}
                   </label>
                 ))}
               </div>

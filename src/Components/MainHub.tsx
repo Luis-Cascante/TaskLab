@@ -3,13 +3,12 @@ import { Swiper as SwiperType } from 'swiper';
 
 import TaskCardV2 from "../Components/TaskCardV2"
 import { useState } from 'react';
-import type { task } from "./PruebasTaskData"
-
+import type { BackendTask } from "../types"   
 type MainHubProps = {
   onPublish?: () => void
   onListTasks?: () => void
-  onOpenTask?: (task: task) => void
-  Tasks : task[]
+  onOpenTask?: (task: BackendTask) => void  
+  Tasks: BackendTask[]                      
 }
 
 function MainHub({ onPublish, onListTasks, onOpenTask, Tasks }: MainHubProps) {
@@ -74,7 +73,6 @@ function MainHub({ onPublish, onListTasks, onOpenTask, Tasks }: MainHubProps) {
           p-4
           bg-transparent 
           rounded-xl 
-          /*scrollbar-none*/
         ">
           <Swiper
             className="flex gap-3 overflow-x-auto w-full pb-2"

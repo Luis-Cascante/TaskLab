@@ -4,18 +4,44 @@ import GeneralInfo from "./PerfilComponentes/GeneralInfo";
 import Portafolio from "./PerfilComponentes/Portafolio";
 import ReviewProfile from "./PerfilComponentes/ReviewsPerfil";
 import Contacto from "./PerfilComponentes/Contacto";
+import TrabajosUser from "./PerfilComponentes/TrabajosUser";
 
-import type { User } from "../types";
+import type { User, Application, BackendTask } from "../types";
 
 interface PerfilUserProps {
+  findUserById:    (id: string) => User | undefined
   user: User;
   isOwner: boolean;
   onEditProfile: () => void;
-  onAddReview: (review: string, rating: number) => void;
+  onAddReview: (review: string, rating: number) => Promise<void>
   onAddPortfolioItem: () => void;
+  publishedTasks: BackendTask[];
+  applications: Application[];
+  appliedTasks: Array<{ task: BackendTask; status: Application["status"] }>;
+  onAddTask: () => void;
+  onEditTask: (task: BackendTask) => void;
+  onHire: (taskId: string, applicationId: string) => Promise<void>;   // 👈 antes: (taskId: number, applicantId: string) => void
+  onReject: (taskId: string, applicationId: string) => Promise<void>; // 👈 antes: (taskId: number, applicantId: string) => void
+  onDeleteReview: (reviewId: string) => Promise<void>
+currentUserId:  string
 }
 
-function PerfilUser({ user, isOwner, onEditProfile, onAddReview, onAddPortfolioItem }: PerfilUserProps) {
+function PerfilUser({
+  user,
+  isOwner,
+  onEditProfile,
+  onAddReview,
+  onAddPortfolioItem,
+  publishedTasks,
+  applications,
+  appliedTasks,
+  onAddTask,
+  onEditTask,
+  onHire,
+  onReject,
+  onDeleteReview,
+  currentUserId
+}: PerfilUserProps) {
   const hasProfessionalProfile =
     !!user.workInfo &&
     user.workInfo.generalInfo.aboutMe !== "" &&
@@ -70,7 +96,45 @@ function PerfilUser({ user, isOwner, onEditProfile, onAddReview, onAddPortfolioI
             </div>
           </section>
 
-          {isOwner ? (
+          {isOwner && (
+            <div className="bg-white border-b border-gray-200">
+              <ul className="max-w-3xl mx-auto flex gap-8 justify-center list-none text-sm font-semibold">
+                <li
+                  className={
+                    pestañaActiva !== "Trabajos"
+                      ? `py-4 ${pestañaActivaClass}`
+                      : `py-4 ${pestañaInactivaClass}`
+                  }
+                  onClick={() => setPestañaActiva("Contacto")}
+                >
+                  Mi perfil
+                </li>
+                <li
+                  className={
+                    pestañaActiva === "Trabajos"
+                      ? `py-4 ${pestañaActivaClass}`
+                      : `py-4 ${pestañaInactivaClass}`
+                  }
+                  onClick={() => setPestañaActiva("Trabajos")}
+                >
+                  Trabajos
+                </li>
+              </ul>
+            </div>
+          )}
+
+          {isOwner && pestañaActiva === "Trabajos" ? (
+            <TrabajosUser
+              pestañaActiva={pestañaActiva}
+              publishedTasks={publishedTasks}
+              applications={applications}
+              appliedTasks={appliedTasks}
+              onAddTask={onAddTask}
+              onEditTask={onEditTask}
+              onHire={onHire}
+              onReject={onReject}
+            />
+          ) : isOwner ? (
             <section className="bg-white py-16 px-4">
               <div className="max-w-3xl mx-auto text-center">
                 <h2 className="text-2xl font-bold text-gray-800 mb-4">
@@ -181,6 +245,18 @@ function PerfilUser({ user, isOwner, onEditProfile, onAddReview, onAddPortfolioI
                 >
                   Opiniones
                 </li>
+                {isOwner && (
+                  <li
+                    className={
+                      pestañaActiva === "Trabajos"
+                        ? `py-4 ${pestañaActivaClass}`
+                        : `py-4 ${pestañaInactivaClass}`
+                    }
+                    onClick={() => setPestañaActiva("Trabajos")}
+                  >
+                    Trabajos
+                  </li>
+                )}
               </ul>
 
               {isOwner && (
@@ -207,6 +283,9 @@ function PerfilUser({ user, isOwner, onEditProfile, onAddReview, onAddPortfolioI
                 onAddPortfolioItem={onAddPortfolioItem}
               />
               <ReviewProfile
+                workerId={user.id}
+                currentUserId={currentUserId}
+                onDeleteReview={onDeleteReview}
                 reviewsProfile={user.workInfo!.reviewsProfile}
                 pestañaActiva={pestañaActiva}
                 onAddReview={onAddReview}
@@ -220,6 +299,18 @@ function PerfilUser({ user, isOwner, onEditProfile, onAddReview, onAddPortfolioI
                 pestañaActiva={pestañaActiva}
                 isOwner={isOwner}
               />
+              {isOwner && (
+                <TrabajosUser
+                  pestañaActiva={pestañaActiva}
+                  publishedTasks={publishedTasks}
+                  applications={applications}
+                  appliedTasks={appliedTasks}
+                  onAddTask={onAddTask}
+                  onEditTask={onEditTask}
+                  onHire={onHire}
+                  onReject={onReject}
+                />
+              )}
             </div>
           </div>
         </section>
