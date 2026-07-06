@@ -21,22 +21,6 @@ interface BackendProfile {
   rating:       number | null
 }
 
-interface BackendUserDetail {
-  id:         string
-  name:       string
-  email:      string
-  created_at: string
-  updated_at: string
-  profile:    BackendProfile | null
-  reviews_received: Array<{
-    id:          string
-    rating:      number
-    review:      string
-    created_at:  string
-    reviewer: { id: string; name: string }
-  }>
-}
-
 interface BackendReview {
   id:          string
   worker_id:   string
@@ -45,6 +29,16 @@ interface BackendReview {
   review:      string
   created_at:  string
   reviewer:    { id: string; name: string }
+}
+
+interface BackendUserDetail {
+  id:         string
+  name:       string
+  email:      string
+  created_at: string
+  updated_at: string
+  profile:    BackendProfile | null
+  reviews_received: BackendReview[]
 }
 
 function mapBackendUserDetail(bu: BackendUserDetail, currentUser: User): User {
@@ -181,6 +175,28 @@ export const userService = {
       return { ok: true, data: undefined }
     } catch (error) {
       return handleError(error, 'No se pudo eliminar la reseña.')
+    }
+  },
+
+  updateUserBasic: async (
+    id: string,
+    data: { name?: string; email?: string; password?: string }
+  ): Promise<UserServiceResult<void>> => {
+    try {
+      await api.put(`/users/${id}`, data)
+      return { ok: true, data: undefined }
+    } catch (error) {
+      return handleError(error, 'No se pudo actualizar la información de la cuenta.')
+    }
+  },
+
+  // 2️⃣ Enlaza con la ruta GET /users/vocations
+  getAvailableVocations: async (): Promise<UserServiceResult<Array<{ id: string; name: string }>>> => {
+    try {
+      const data = await api.get<Array<{ id: string; name: string }>>('/users/vocations')
+      return { ok: true, data }
+    } catch (error) {
+      return handleError(error, 'No se pudo cargar la lista de vocaciones desde el servidor.')
     }
   },
 }

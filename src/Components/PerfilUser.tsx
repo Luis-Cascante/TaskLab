@@ -20,8 +20,8 @@ interface PerfilUserProps {
   appliedTasks: Array<{ task: BackendTask; status: Application["status"] }>;
   onAddTask: () => void;
   onEditTask: (task: BackendTask) => void;
-  onHire: (taskId: string, applicationId: string) => Promise<void>;   // 👈 antes: (taskId: number, applicantId: string) => void
-  onReject: (taskId: string, applicationId: string) => Promise<void>; // 👈 antes: (taskId: number, applicantId: string) => void
+   onHireApplicant: (taskId: string, applicationId: string) => Promise<void>;
+  onRejectApplicant: (taskId: string, applicationId: string) => Promise<void>;
   onDeleteReview: (reviewId: string) => Promise<void>
 currentUserId:  string
 }
@@ -37,8 +37,8 @@ function PerfilUser({
   appliedTasks,
   onAddTask,
   onEditTask,
-  onHire,
-  onReject,
+  onHireApplicant,
+  onRejectApplicant,
   onDeleteReview,
   currentUserId
 }: PerfilUserProps) {
@@ -131,8 +131,8 @@ function PerfilUser({
               appliedTasks={appliedTasks}
               onAddTask={onAddTask}
               onEditTask={onEditTask}
-              onHire={onHire}
-              onReject={onReject}
+              onHire={onHireApplicant}      
+              onReject={onRejectApplicant}  
             />
           ) : isOwner ? (
             <section className="bg-white py-16 px-4">
@@ -307,8 +307,8 @@ function PerfilUser({
                   appliedTasks={appliedTasks}
                   onAddTask={onAddTask}
                   onEditTask={onEditTask}
-                  onHire={onHire}
-                  onReject={onReject}
+                  onHire={onHireApplicant}      
+                  onReject={onRejectApplicant}  
                 />
               )}
             </div>

@@ -66,13 +66,21 @@ function App() {
   const [usersList,         setUsersList]         = useState<User[]>(() => workersList.map(workerToUser))
   const [selectedProfileId, setSelectedProfileId] = useState<string>(auth.loggedInUser.id)
 
+  const [profileDetail,    setProfileDetail]    = useState<User | null>(null)
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false)
+  const [profileError,     setProfileError]     = useState<string | null>(null)
+
+  const isMockWorkerId = (id: string) => id.startsWith("worker-")
+
   const findAnyUserById = (id: string): User | undefined =>
     auth.findUserById(id) ?? usersList.find((u) => u.id === id)
 
   const selectedUser: User =
-    auth.findUserById(selectedProfileId) ??
-    usersList.find((u) => u.id === selectedProfileId) ??
-    auth.loggedInUser
+  selectedProfileId === auth.loggedInUser.id
+    ? auth.loggedInUser
+    : profileDetail ??
+      usersList.find((u) => u.id === selectedProfileId) ??
+      auth.loggedInUser
 
   const isOwnerProfile      = selectedUser.id === auth.loggedInUser.id
   const myPublishedTasks    = tasksList.filter((t) => t.employer_id === auth.loggedInUser.id)
@@ -114,6 +122,12 @@ function App() {
     }
   }, [auth.loggedInUser.id, auth.loggedInUser.name, auth.loggedInUser.profilePicture])
 
+  const refetchProfile = useCallback(async (id: string) => {
+  const fallback = findAnyUserById(id) ?? auth.loggedInUser
+  const result = await userService.getUserById(id, fallback)
+  if (result.ok) setProfileDetail(result.data)
+  }, [usersList, auth])
+
   const loadApplicationsForMyTasks = useCallback(async (tasks: BackendTask[]) => {
     const entries = await Promise.all(
       tasks.map(async (task) => {
@@ -145,6 +159,40 @@ function App() {
       loadApplicationsForMyTasks(myPublishedTasks)
     }
   }, [tasksList, auth.loggedInUser.id])
+
+useEffect(() => {
+  // Tu propio perfil no necesita fetch — ya vive en auth.loggedInUser
+  if (selectedProfileId === auth.loggedInUser.id) {
+    setProfileDetail(null)
+    setProfileError(null)
+    return
+  }
+
+  // Perfiles mock de prueba (Trabajadores.tsx) siguen resolviéndose de usersList
+  if (isMockWorkerId(selectedProfileId)) {
+    setProfileDetail(null)
+    setProfileError(null)
+    return
+  }
+
+  let cancelled = false
+  setIsLoadingProfile(true)
+  setProfileError(null)
+
+  const fallback = findAnyUserById(selectedProfileId) ?? auth.loggedInUser
+  userService.getUserById(selectedProfileId, fallback).then((result) => {
+    if (cancelled) return
+    if (result.ok) {
+      setProfileDetail(result.data)
+    } else {
+      setProfileError(result.error)
+      setProfileDetail(null)
+    }
+    setIsLoadingProfile(false)
+  })
+
+  return () => { cancelled = true }
+}, [selectedProfileId])
 
   const handleLogin = async (cedula: string, password: string) => {
     const result = await auth.login(cedula, password)
@@ -269,9 +317,12 @@ function App() {
   }
 
   const handleSaveProfile = async (updatedUser: User) => {
-    auth.updateLoggedInUser(() => updatedUser)
-    setActiveView("profile")
-  }
+  auth.updateLoggedInUser(() => updatedUser)  // ✅ envuelto en arrow function
+  setUsersList((prev) =>                      // ✅ nombre correcto
+    prev.map((w) => (w.id === updatedUser.id ? updatedUser : w))
+  )
+  setActiveView("profile")
+}
 
   const handleAddPortfolioItem = (item: NewPortfolioItemData) => {
     auth.updateLoggedInUser((prev) =>
@@ -292,62 +343,61 @@ function App() {
   }
 
   const handleAddReview = async (reviewText: string, rating: number) => {
-    const result = await userService.addReview(selectedProfileId, rating, reviewText)
-    if (!result.ok) {
-      console.error("Error al agregar reseña:", result.error)
-      return
-    }
-
-    const newReview = result.data
-
-    const addToWorkInfo = (user: User): User =>
-      user.workInfo
-        ? {
-            ...user,
-            workInfo: {
-              ...user.workInfo,
-              reviews:        user.workInfo.reviews + 1,
-              reviewsProfile: [...user.workInfo.reviewsProfile, newReview],
-            },
-          }
-        : user
-
-    if (auth.findUserById(selectedProfileId)) {
-      auth.updateUserById(selectedProfileId, addToWorkInfo)
-    } else {
-      setUsersList((prev) =>
-        prev.map((u) => (u.id === selectedProfileId ? addToWorkInfo(u) : u))
-      )
-    }
+  const result = await userService.addReview(selectedProfileId, rating, reviewText)
+  if (!result.ok) {
+    console.error("Error al agregar reseña:", result.error)
+    return
   }
+
+  if (isMockWorkerId(selectedProfileId)) {
+    const newReview = result.data
+    setUsersList((prev) =>
+      prev.map((u) =>
+        u.id === selectedProfileId && u.workInfo
+          ? {
+              ...u,
+              workInfo: {
+                ...u.workInfo,
+                reviews: u.workInfo.reviews + 1,
+                reviewsProfile: [...u.workInfo.reviewsProfile, newReview],
+              },
+            }
+          : u
+      )
+    )
+    return
+  }
+
+  await refetchProfile(selectedProfileId)
+}
 
   const handleDeleteReview = async (reviewId: string) => {
-    const result = await userService.deleteReview(selectedProfileId, reviewId)
-    if (!result.ok) {
-      console.error("Error al eliminar reseña:", result.error)
-      return
-    }
-
-    const removeFromWorkInfo = (user: User): User =>
-      user.workInfo
-        ? {
-            ...user,
-            workInfo: {
-              ...user.workInfo,
-              reviews:        Math.max(0, user.workInfo.reviews - 1),
-              reviewsProfile: user.workInfo.reviewsProfile.filter((r) => r.id !== reviewId),
-            },
-          }
-        : user
-
-    if (auth.findUserById(selectedProfileId)) {
-      auth.updateUserById(selectedProfileId, removeFromWorkInfo)
-    } else {
-      setUsersList((prev) =>
-        prev.map((u) => (u.id === selectedProfileId ? removeFromWorkInfo(u) : u))
-      )
-    }
+  const result = await userService.deleteReview(selectedProfileId, reviewId)
+  if (!result.ok) {
+    console.error("Error al eliminar reseña:", result.error)
+    return
   }
+
+  if (isMockWorkerId(selectedProfileId)) {
+    setUsersList((prev) =>
+      prev.map((u) =>
+        u.id === selectedProfileId && u.workInfo
+          ? {
+              ...u,
+              workInfo: {
+                ...u.workInfo,
+                reviews: Math.max(0, u.workInfo.reviews - 1),
+                reviewsProfile: u.workInfo.reviewsProfile.filter((r) => r.id !== reviewId),
+              },
+            }
+          : u
+      )
+    )
+    return
+  }
+
+  await refetchProfile(selectedProfileId)
+}
 
   if (activeView === "publish") {
     return (
@@ -414,6 +464,12 @@ function App() {
         return <Trabajadores onOpenProfile={handleOpenWorkerProfile} Workers={workersList} />
 
       case "profile":
+        if (isLoadingProfile) {
+    return <div className="text-center py-16 text-gray-500">Cargando perfil...</div>
+  }
+  if (profileError) {
+    return <div className="text-center py-16 text-red-600">{profileError}</div>
+  }
         return (
           <PerfilUser
             user={selectedUser}
@@ -435,13 +491,18 @@ function App() {
         )
 
       case "edit-profile":
-        return (
-          <EditProfile
-            user={auth.loggedInUser}
-            onSave={handleSaveProfile}
-            onCancel={() => setActiveView("profile")}
-          />
-        )
+  // Protección de TypeScript contra valores nulos en el contexto Auth
+  if (!auth || !auth.loggedInUser) {
+    return <div className="p-8 text-center text-gray-500">Cargando sesión de usuario...</div>
+  }
+
+  return (
+    <EditProfile
+      user={auth.loggedInUser}
+      onSave={handleSaveProfile}
+      onCancel={() => setActiveView("profile")}
+    />
+  )
 
       case "add-portfolio-item":
         return (
